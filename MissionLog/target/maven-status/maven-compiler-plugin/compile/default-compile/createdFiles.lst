@@ -1,0 +1,13 @@
+com\meetingai\repository\MeetingRepository.class
+com\meetingai\service\SpeechToTextService.class
+com\meetingai\MeetingApplication.class
+com\meetingai\service\MinutesGeneratorService.class
+com\meetingai\model\Speaker.class
+com\meetingai\controller\MeetingController.class
+com\meetingai\controller\AudioController.class
+com\meetingai\model\Meeting.class
+com\meetingai\service\NLPService.class
+com\meetingai\model\ActionItem.class
+com\meetingai\service\ExportService.class
+com\meetingai\controller\ExportController.class
+com\meetingai\model\Decision.class

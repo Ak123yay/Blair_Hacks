@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Meeting Minutes Generator | Professional Meeting Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <span>AI Meeting Minutes</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="active">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="dashboard.html">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="meetings.html">
+                    <i class="fas fa-calendar-alt"></i> All Meetings
+                </a>
+            </div>
+            <div class="nav-right">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search meetings...">
+                </div>
+                <div class="user-menu">
+                    <img src="https://ui-avatars.com/api/?background=667eea&color=fff&name=User" alt="Profile">
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Transform Your Meetings into <span class="gradient-text">Actionable Insights</span></h1>
+            <p>AI-powered meeting minutes generator that captures, transcribes, and summarizes your meetings automatically. Save time and never miss important decisions again.</p>
+            <div class="hero-buttons">
+                <button class="btn-primary" onclick="scrollToGenerator()">
+                    <i class="fas fa-microphone"></i> Start New Meeting
+                </button>
+                <button class="btn-outline" onclick="watchDemo()">
+                    <i class="fas fa-play"></i> Watch Demo
+                </button>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-number">5000+</span>
+                    <span class="stat-label">Meetings Processed</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">98%</span>
+                    <span class="stat-label">Accuracy Rate</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">10k+</span>
+                    <span class="stat-label">Happy Users</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-image">
+            <div class="floating-card">
+                <i class="fas fa-microphone-alt"></i>
+                <span>Recording...</span>
+            </div>
+            <div class="floating-card card-2">
+                <i class="fas fa-file-alt"></i>
+                <span>Generating Minutes</span>
+            </div>
+            <div class="floating-card card-3">
+                <i class="fas fa-check-circle"></i>
+                <span>Ready</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="section-header">
+            <h2>Powerful Features for Modern Teams</h2>
+            <p>Everything you need to manage meeting notes efficiently</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-microphone"></i>
+                </div>
+                <h3>Speech to Text</h3>
+                <p>Record live meetings or upload audio files. Automatic transcription with speaker identification.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3>AI Summarization</h3>
+                <p>Advanced NLP extracts key points, decisions, and action items automatically.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <h3>Action Items</h3>
+                <p>Auto-detect tasks, assignees, and deadlines from conversation.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+                <h3>Multiple Exports</h3>
+                <p>Export to PDF, DOCX, or TXT. Share instantly with your team.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Meeting Generator Section -->
+    <section id="generator" class="generator-section">
+        <div class="section-header">
+            <h2>Generate Meeting Minutes</h2>
+            <p>Choose your preferred input method</p>
+        </div>
+
+        <div class="generator-container">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="upload">
+                    <i class="fas fa-upload"></i> Upload Audio
+                </button>
+                <button class="tab-btn" data-tab="record">
+                    <i class="fas fa-microphone-alt"></i> Live Record
+                </button>
+                <button class="tab-btn" data-tab="text">
+                    <i class="fas fa-keyboard"></i> Paste Transcript
+                </button>
+            </div>
+
+            <!-- Upload Audio Tab -->
+            <div class="tab-pane active" id="uploadTab">
+                <div class="upload-area" id="dropZone">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Drop your audio file here</h3>
+                    <p>or click to browse</p>
+                    <p class="file-info">Supports MP3, WAV, M4A (Max 10MB)</p>
+                    <input type="file" id="audioFile" accept="audio/*" hidden>
+                    <button class="btn-secondary" onclick="document.getElementById('audioFile').click()">
+                        <i class="fas fa-folder-open"></i> Browse Files
+                    </button>
+                </div>
+                <div id="uploadProgress" class="progress-bar" style="display:none;">
+                    <div class="progress-fill"></div>
+                    <span>Processing audio...</span>
+                </div>
+            </div>
+
+            <!-- Live Record Tab -->
+            <div class="tab-pane" id="recordTab">
+                <div class="record-area">
+                    <div class="waveform" id="waveform">
+                        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                    </div>
+                    <div class="record-controls">
+                        <button id="startRecordBtn" class="record-btn">
+                            <i class="fas fa-circle"></i> Start Recording
+                        </button>
+                        <button id="stopRecordBtn" class="record-btn stop" style="display:none;">
+                            <i class="fas fa-stop"></i> Stop Recording
+                        </button>
+                    </div>
+                    <div id="recordTimer" class="timer" style="display:none;">00:00</div>
+                    <div id="recordingStatus" class="recording-status" style="display:none;">
+                        <i class="fas fa-spinner fa-pulse"></i> Transcribing...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paste Transcript Tab -->
+            <div class="tab-pane" id="textTab">
+                <div class="form-group">
+                    <label><i class="fas fa-heading"></i> Meeting Title</label>
+                    <input type="text" id="title" placeholder="e.g., Q1 Product Launch Planning">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar"></i> Date</label>
+                        <input type="date" id="date">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Meeting Type</label>
+                        <select id="meetingType">
+                            <option>Team Sync</option>
+                            <option>Client Meeting</option>
+                            <option>Project Review</option>
+                            <option>Planning Session</option>
+                            <option>Daily Standup</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-file-alt"></i> Transcript</label>
+                    <textarea id="transcript" rows="10" placeholder="Paste your meeting transcript here..."></textarea>
+                    <div class="textarea-tools">
+                        <button onclick="loadSample()" class="tool-btn">
+                            <i class="fas fa-file-import"></i> Load Sample
+                        </button>
+                        <button onclick="clearTranscript()" class="tool-btn">
+                            <i class="fas fa-eraser"></i> Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="generateBtn" class="btn-primary btn-large" onclick="generateMinutes()">
+                    <i class="fas fa-magic"></i> Generate Minutes
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="resultSection" class="result-section" style="display:none;">
+        <div class="section-header">
+            <h2>Meeting Minutes</h2>
+            <div class="export-buttons">
+                <button onclick="exportToPDF()" class="btn-export">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
+                <button onclick="exportToDOCX()" class="btn-export">
+                    <i class="fas fa-file-word"></i> DOCX
+                </button>
+                <button onclick="exportToTXT()" class="btn-export">
+                    <i class="fas fa-file-alt"></i> TXT
+                </button>
+                <button onclick="copyToClipboard()" class="btn-export">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+        <div id="minutesContent" class="minutes-content"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>AI Meeting Minutes</h4>
+                <p>Transform your meetings into actionable insights with AI-powered technology.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <a href="#">About Us</a>
+                <a href="#">Features</a>
+                <a href="#">Pricing</a>
+                <a href="#">Support</a>
+            </div>
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Security</a>
+            </div>
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 AI Meeting Minutes Generator. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Set today's date
+        document.getElementById('date').valueAsDate = new Date();
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(tabId + 'Tab').classList.add('active');
+            });
+        });
+
+        // Scroll to generator
+        function scrollToGenerator() {
+            document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function watchDemo() {
+            showToast('Demo video coming soon!', 'info');
+        }
+
+        // Audio upload with drag and drop
+        const dropZone = document.getElementById('dropZone');
+        const audioInput = document.getElementById('audioFile');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('audio/')) {
+                uploadAudio(file);
+            }
+        });
+
+        dropZone.addEventListener('click', () => {
+            audioInput.click();
+        });
+
+        audioInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                uploadAudio(e.target.files[0]);
+            }
+        });
+
+        async function uploadAudio(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const progressBar = document.getElementById('uploadProgress');
+            progressBar.style.display = 'block';
+
+            try {
+                const response = await fetch('/api/audio/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                progressBar.style.display = 'none';
+
+                if (result.error) {
+                    showToast(result.error, 'error');
+                } else {
+                    showToast('Audio transcribed successfully!', 'success');
+                    document.getElementById('title').value = file.name.replace(/\.[^/.]+$/, '');
+                    document.getElementById('transcript').value = result.transcript;
+                    // Switch to text tab
+                    document.querySelector('[data-tab="text"]').click();
+                    generateMinutes();
+                }
+            } catch (error) {
+                progressBar.style.display = 'none';
+                showToast('Error uploading audio', 'error');
+            }
+        }
+
+        // Recording functionality
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordTimer = null;
+        let seconds = 0;
+
+        document.getElementById('startRecordBtn').addEventListener('click', startRecording);
+        document.getElementById('stopRecordBtn').addEventListener('click', stopRecording);
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioFile = new File([audioBlob], 'recording.wav', { type: 'audio/wav' });
+
+                    const formData = new FormData();
+                    formData.append('file', audioFile);
+
+                    document.getElementById('recordingStatus').style.display = 'block';
+
+                    try {
+                        const response = await fetch('/api/audio/upload', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const result = await response.json();
+                        document.getElementById('recordingStatus').style.display = 'none';
+
+                        if (result.error) {
+                            showToast(result.error, 'error');
+                        } else {
+                            showToast('Recording transcribed successfully!', 'success');
+                            document.getElementById('transcript').value = result.transcript;
+                            document.querySelector('[data-tab="text"]').click();
+                            generateMinutes();
+                        }
+                    } catch (error) {
+                        document.getElementById('recordingStatus').style.display = 'none';
+                        showToast('Error transcribing recording', 'error');
+                    }
+
+                    stream.getTracks().forEach(track => track.stop());
+                    clearInterval(recordTimer);
+                    document.getElementById('recordTimer').style.display = 'none';
+                    document.getElementById('waveform').classList.remove('recording');
+                };
+
+                mediaRecorder.start();
+                document.getElementById('startRecordBtn').style.display = 'none';
+                document.getElementById('stopRecordBtn').style.display = 'flex';
+                document.getElementById('recordTimer').style.display = 'block';
+                document.getElementById('waveform').classList.add('recording');
+
+                seconds = 0;
+                recordTimer = setInterval(() => {
+                    seconds++;
+                    const mins = Math.floor(seconds / 60);
+                    const secs = seconds % 60;
+                    document.getElementById('recordTimer').textContent = 
+                        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }, 1000);
+
+            } catch (error) {
+                showToast('Microphone access denied', 'error');
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                document.getElementById('startRecordBtn').style.display = 'flex';
+                document.getElementById('stopRecordBtn').style.display = 'none';
+            }
+        }
+
+        let currentMeetingId = null;
+
+        async function generateMinutes() {
+            const title = document.getElementById('title').value;
+            const date = document.getElementById('date').value;
+            const transcript = document.getElementById('transcript').value;
+            const meetingType = document.getElementById('meetingType').value;
+
+            if (!title) {
+                showToast('Please enter a meeting title', 'error');
+                return;
+            }
+
+            if (!transcript) {
+                showToast('Please enter a transcript or upload audio', 'error');
+                return;
+            }
+
+            const generateBtn = document.getElementById('generateBtn');
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Generating...';
+            generateBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/meetings/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: title,
+                        date: date,
+                        transcript: transcript,
+                        meetingType: meetingType
+                    })
+                });
+
+                const meeting = await response.json();
+                currentMeetingId = meeting.id;
+
+                displayMinutes(meeting);
+                showToast('Minutes generated successfully!', 'success');
+
+            } catch (error) {
+                showToast('Error generating minutes', 'error');
+            } finally {
+                generateBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Minutes';
+                generateBtn.disabled = false;
+            }
+        }
+
+        function displayMinutes(meeting) {
+            const resultSection = document.getElementById('resultSection');
+            const minutesContent = document.getElementById('minutesContent');
+
+            minutesContent.innerHTML = meeting.fullMinutes.replace(/\n/g, '<br>');
+            resultSection.style.display = 'block';
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function exportToPDF() {
+            if (!currentMeetingId) return;
+            window.open(`/api/export/pdf/${currentMeetingId}`, '_blank');
+        }
+
+        async function exportToDOCX() {
+            if (!currentMeetingId) return;
+            window.open(`/api/export/docx/${currentMeetingId}`, '_blank');
+        }
+
+        async function exportToTXT() {
+            if (!currentMeetingId) return;
+            window.open(`/api/export/txt/${currentMeetingId}`, '_blank');
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('minutesContent').innerText;
+            navigator.clipboard.writeText(text);
+            showToast('Copied to clipboard!', 'success');
+        }
+
+        function loadSample() {
+            document.getElementById('title').value = 'Product Launch Planning Meeting';
+            document.getElementById('transcript').value = `[John Smith] Good morning everyone. Let us start the meeting.
+[Sarah Johnson] I have prepared the Q1 marketing plan.
+[John Smith] Excellent. Sarah will lead the marketing campaign.
+[Mike Williams] I will handle the technical implementation.
+[Sarah Johnson] We decided to allocate $5000 for advertising.
+[John Smith] The team agreed to review progress every Monday.
+[John Smith] Meeting adjourned. Thank you everyone.`;
+            showToast('Sample loaded!', 'success');
+        }
+
+        function clearTranscript() {
+            document.getElementById('transcript').value = '';
+        }
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // Search functionality
+        const searchInput = document.querySelector('.search-bar input');
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                window.location.href = `meetings.html?search=${encodeURIComponent(e.target.value)}`;
+            }
+        });
+    </script>
+</body>
+</html>

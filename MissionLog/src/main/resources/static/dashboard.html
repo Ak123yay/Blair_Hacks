@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AI Meeting Minutes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .stat-icon i {
+            font-size: 1.8rem;
+            color: white;
+        }
+        
+        .stat-info h3 {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        
+        .recent-meetings {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .meeting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .meeting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .meeting-title {
+            font-weight: 600;
+        }
+        
+        .meeting-date {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        canvas {
+            max-height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <span>AI Meeting Minutes</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="dashboard.html" class="active">Dashboard</a>
+                <a href="meetings.html">All Meetings</a>
+            </div>
+            <div class="nav-right">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search meetings...">
+                </div>
+                <div class="user-menu">
+                    <img src="https://ui-avatars.com/api/?background=667eea&color=fff&name=User" alt="Profile">
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 1400px; margin: 2rem auto; padding: 0 2rem;">
+        <h1>Dashboard</h1>
+        <p style="color: #64748b; margin-bottom: 2rem;">Welcome back! Here's an overview of your meeting activity.</p>
+
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Total Meetings</h3>
+                    <div class="stat-number" id="totalMeetings">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Action Items</h3>
+                    <div class="stat-number" id="totalActions">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Participants</h3>
+                    <div class="stat-number" id="totalParticipants">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Total Hours</h3>
+                    <div class="stat-number" id="totalHours">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="recent-meetings">
+            <h2>Recent Meetings</h2>
+            <div id="recentList"></div>
+        </div>
+
+        <div class="chart-container">
+            <h2>Meeting Activity</h2>
+            <canvas id="activityChart"></canvas>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>AI Meeting Minutes</h4>
+                <p>Transform your meetings into actionable insights.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <a href="#">About</a>
+                <a href="#">Features</a>
+                <a href="#">Support</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 AI Meeting Minutes Generator. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/meetings');
+                const meetings = await response.json();
+                
+                document.getElementById('totalMeetings').textContent = meetings.length;
+                document.getElementById('totalActions').textContent = meetings.reduce((sum, m) => {
+                    if (m.actionItems) {
+                        return sum + (m.actionItems.split('\n').filter(l => l.match(/^\d+\./)).length);
+                    }
+                    return sum;
+                }, 0);
+                
+                const recentList = document.getElementById('recentList');
+                if (meetings.length === 0) {
+                    recentList.innerHTML = '<p style="text-align:center; padding:2rem;">No meetings yet. <a href="index.html">Create your first meeting</a></p>';
+                } else {
+                    recentList.innerHTML = meetings.slice(0, 5).map(m => `
+                        <div class="meeting-item">
+                            <div>
+                                <div class="meeting-title">${m.title}</div>
+                                <div class="meeting-date">${m.date || 'No date'} | Duration: ${m.duration || 'N/A'}</div>
+                            </div>
+                            <span class="badge badge-completed">${m.status || 'Completed'}</span>
+                        </div>
+                    `).join('');
+                }
+                
+                // Chart
+                const ctx = document.getElementById('activityChart').getContext('2d');
+                const last7Days = getLast7Days();
+                const meetingCounts = last7Days.map(day => {
+                    return meetings.filter(m => m.date === day).length;
+                });
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: last7Days,
+                        datasets: [{
+                            label: 'Meetings',
+                            data: meetingCounts,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+        
+        function getLast7Days() {
+            const dates = [];
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                dates.push(date.toISOString().split('T')[0]);
+            }
+            return dates;
+        }
+        
+        loadDashboard();
+        
+        const searchInput = document.querySelector('.search-bar input');
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                window.location.href = `meetings.html?search=${encodeURIComponent(e.target.value)}`;
+            }
+        });
+    </script>
+</body>
+</html>
