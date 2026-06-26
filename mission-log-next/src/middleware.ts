@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const publicPaths = ['/', '/login', '/auth/callback'];
+  const publicPaths = ['/', '/login', '/signup', '/auth/callback'];
   const isPublicPath = publicPaths.includes(request.nextUrl.pathname);
 
   if (!isPublicPath) {

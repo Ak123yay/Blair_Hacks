@@ -1,4 +1,4 @@
-export type MissionMode = "standard" | "vex" | "hackathon" | "startup" | "research" | "freelance" | "enterprise";
+export type MissionMode = "custom" | "standard" | "vex" | "hackathon" | "startup" | "research" | "freelance" | "enterprise";
 
 export interface TaskAssignment {
   task: string;
@@ -49,4 +49,5 @@ export interface MissionFormData {
   crew: string;
   transcript: string;
   projectName: string;
+  customCategory?: string; // For custom mode
 }

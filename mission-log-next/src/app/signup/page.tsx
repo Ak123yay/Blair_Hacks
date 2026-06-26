@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Ic } from "@/components/icons/Ic";
+import { signUpWithEmail } from "@/lib/supabase";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -9,11 +11,31 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [team, setTeam] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1500);
+    setError(null);
+
+    try {
+      const { data, error } = await signUpWithEmail(email, password);
+      
+      if (error) {
+        setError(error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign up failed");
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -112,6 +134,11 @@ export default function SignupPage() {
           </p>
 
           <form onSubmit={handleSubmit}>
+            {error && (
+              <div style={{ padding: 12, background: "oklch(0.93 0.08 25)", border: "1px solid oklch(0.75 0.12 25)", borderRadius: 4, marginBottom: 16, fontSize: 13, color: "oklch(0.45 0.12 25)" }}>
+                {error}
+              </div>
+            )}
             <div style={{ marginBottom: 16 }}>
               <label className="mono" style={{ display: "block", marginBottom: 8 }}>
                 Full Name

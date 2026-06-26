@@ -18,6 +18,7 @@ const modes: { value: MissionMode; label: string; icon: string; desc: string }[]
   { value: "research", label: "Research Lab", icon: "book", desc: "Experiments & publications" },
   { value: "freelance", label: "Freelance", icon: "user", desc: "Client work & deliverables" },
   { value: "enterprise", label: "Enterprise", icon: "database", desc: "Corporate engineering teams" },
+  { value: "custom", label: "Custom", icon: "sparkle", desc: "Define your own category" },
 ];
 
 export default function MissionForm({ onSubmit, loading }: MissionFormProps) {
@@ -27,6 +28,7 @@ export default function MissionForm({ onSubmit, loading }: MissionFormProps) {
     crew: "",
     transcript: "",
     projectName: "",
+    customCategory: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -43,13 +45,13 @@ export default function MissionForm({ onSubmit, loading }: MissionFormProps) {
           Document your <span className="serif-italic">team meeting</span>
         </h1>
         <p style={{ fontSize: 14.5, color: "var(--ink-3)", marginTop: 14 }}>
-          Paste your notes. AI generates engineering logs, tasks, and judge-ready summaries.
+          Paste your notes. AI generates engineering logs, tasks, and stakeholder summaries.
         </p>
       </div>
 
       {/* MODE SELECTION */}
       <StyleSection label="Mission Mode" hint="Choose the documentation style">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
           {modes.map((mode) => (
             <button
               key={mode.value}
@@ -105,6 +107,30 @@ export default function MissionForm({ onSubmit, loading }: MissionFormProps) {
             </button>
           ))}
         </div>
+
+        {/* CUSTOM CATEGORY INPUT */}
+        {formData.missionMode === "custom" && (
+          <div style={{ marginTop: 16 }}>
+            <label className="mono" style={{ display: "block", marginBottom: 6 }}>
+              <Ic name="sparkle" size={11} className="inline mr-1" /> What's your team category?
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.customCategory}
+              onChange={(e) => setFormData((f) => ({ ...f, customCategory: e.target.value }))}
+              placeholder="e.g., Podcast Production, Film Crew, Medical Team, Construction, Event Planning..."
+              className="input"
+              style={{ borderColor: "var(--accent)", background: "var(--accent-softer)" }}
+            />
+<p style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 8 }}>
+          <span style={{ display: "inline-flex", alignItems: "center", marginRight: 4 }}>
+            <Ic name="info" size={11} className="inline" />
+          </span>
+          AI will auto-generate a custom prompt for {formData.customCategory || "your category"} with industry-specific terminology and documentation standards.
+        </p>
+          </div>
+        )}
       </StyleSection>
 
       {/* TITLE & PROJECT */}
@@ -174,7 +200,14 @@ Example:
       <div style={{ display: "flex", gap: 12, marginTop: 28, justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ fontSize: 13, color: "var(--ink-3)" }}>
           <Ic name="sparkle" size={13} className="inline" color="var(--accent-ink)" />
-          <span style={{ marginLeft: 6 }}>Powered by GLM 5.1 · ~30 seconds</span>
+          <span style={{ marginLeft: 6 }}>
+            Powered by GLM 5.1 · ~30 seconds
+            {formData.missionMode === "custom" && formData.customCategory && (
+              <span style={{ marginLeft: 8, color: "var(--accent-ink)" }}>
+                · Custom: {formData.customCategory}
+              </span>
+            )}
+          </span>
         </div>
         <button
           type="submit"

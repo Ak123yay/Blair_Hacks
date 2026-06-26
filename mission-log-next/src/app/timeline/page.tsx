@@ -20,9 +20,10 @@ function useLocalStorageMissions() {
 export default function TimelinePage() {
   const missions = useLocalStorageMissions();
 
-return (
-    <div className="fadein-up">
-      <div style={{ marginBottom: 28 }}>
+  return (
+    <DashShell>
+      <div className="fadein-up">
+        <div style={{ marginBottom: 28 }}>
           <div className="eyebrow" style={{ marginBottom: 8 }}>Mission Timeline</div>
           <h1 className="serif" style={{ fontSize: 40, fontWeight: 400, margin: 0 }}>
             Track your <span className="serif-italic">progress</span>

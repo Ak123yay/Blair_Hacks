@@ -3,14 +3,41 @@ import { v4 as uuidv4 } from "uuid";
 
 const GLM_API_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
 
-function getSystemPrompt(mode: MissionMode): string {
+function getSystemPrompt(mode: MissionMode, customCategory?: string): string {
+  if (mode === "custom" && customCategory) {
+    return `You are MissionLog AI, a specialized documentation assistant for ${customCategory} teams. You analyze meeting transcripts and generate structured, professional documentation tailored to ${customCategory}.
+
+THEME: You use space mission terminology. Meetings are "Missions", logs are "Flight Logs", tasks are "Objectives", team members are "Crew", problems are "System Anomalies", decisions are "Command Decisions", and next steps are "Launch Checklist" items.
+
+For ${customCategory}, focus on:
+- Industry-specific terminology and workflows
+- Relevant deliverables and milestones
+- Common challenges and success metrics in this field
+- Stakeholder communication needs
+
+You MUST respond with valid JSON only. No markdown, no code fences, no extra text. Just the raw JSON object.
+
+Generate documentation with this exact structure:
+{
+  "summary": "Concise mission summary (2-4 sentences)",
+  "engineeringNotebookEntry": "A formal log entry for ${customCategory} with sections: Date, Team Present, Objectives, Work Completed, Decisions Made, Results/Progress, Blockers, Next Steps. Use industry-appropriate language.",
+  "commandDecisions": [{"decision": "what was decided", "rationale": "why it was decided", "madeBy": "who decided or 'Team'", "impact": "expected impact"}],
+  "taskAssignments": [{"task": "what needs to be done", "assignee": "person name or 'Unassigned'", "dueDate": "if mentioned or 'Not specified'", "priority": "CRITICAL|HIGH|MEDIUM|LOW", "status": "PENDING"}],
+  "systemAnomalies": [{"problem": "what went wrong or challenge identified", "context": "surrounding context", "severity": "CRITICAL|HIGH|MEDIUM|LOW", "suggestedFix": "how to resolve it"}],
+  "nextMissionGoals": ["goal1", "goal2", ...],
+  "proofChecklist": ["documentation items, deliverables, or evidence needed in ${customCategory}"],
+  "judgeRecap": "A paragraph explaining what was accomplished, what changed, and why - suitable for stakeholders, clients, or reviewers in ${customCategory}",
+  "missingDocumentationWarnings": ["warnings about stuff mentioned but not properly documented for ${customCategory} standards"]
+}`;
+  }
+
   const basePrompt = `You are MissionLog AI, an engineering documentation assistant for tech teams including robotics, hackathons, startups, research labs, freelance developers, and enterprise teams. You analyze meeting transcripts and generate structured, professional documentation.
 
 THEME: You use space mission terminology. Meetings are "Missions", engineering notebooks are "Flight Logs", tasks are "Objectives", team members are "Crew", bugs/problems are "System Anomalies", design decisions are "Command Decisions", and next steps are "Launch Checklist" items.
 
 You MUST respond with valid JSON only. No markdown, no code fences, no extra text. Just the raw JSON object.`;
 
-  const modePrompts: Record<MissionMode, string> = {
+  const modePrompts: Record<Exclude<MissionMode, "custom">, string> = {
     standard: `${basePrompt}
 
 Analyze the meeting transcript and return JSON with this exact structure:
@@ -129,21 +156,51 @@ Analyze the meeting transcript and return JSON with this exact structure:
 }`
   };
 
+  if (mode === "custom") {
+    return modePrompts.standard;
+  }
+  
   return modePrompts[mode];
 }
 
-function getUserPrompt(transcript: string, crew: string, mode: MissionMode): string {
+function getUserPrompt(transcript: string, crew: string, mode: MissionMode, customCategory?: string): string {
   const crewList = crew.trim() ? `Crew members present: ${crew}` : "Crew members: extract from transcript context clues or mark as 'Unknown'";
 
-  const modeContext: Record<MissionMode, string> = {
+  if (mode === "custom" && customCategory) {
+    return `This is a ${customCategory} team meeting. Focus on properly documenting the work discussed using ${customCategory} terminology and standards.
+
+${crewList}
+
+MEETING TRANSCRIPT:
+---
+${transcript}
+---
+
+Analyze this transcript and generate the structured documentation. Be thorough and specific. Include actual names, measurements, technical details, and industry-specific information when mentioned. If something is vague in the transcript, note it in missingDocumentationWarnings. Remember: respond with valid JSON only, no markdown formatting.`;
+  }
+
+const modeContext: Record<Exclude<MissionMode, "custom">, string> = {
     standard: "This is a general engineering/team meeting. Focus on properly documenting the work discussed.",
     vex: "This is a VEX Robotics team meeting. Pay special attention to robot design changes, programming updates, test results with specific data, and engineering design process documentation that VEX judges expect.",
     hackathon: "This is a hackathon team meeting. Focus on feature progress, technical decisions, demo readiness, and timeline tracking.",
-    startup: "This is a startup team meeting. Focus on product development, user feedback, growth metrics, business decisions, and strategic direction. Include specific numbers and KPIs when mentioned.",
-    research: "This is a research lab or academic team meeting. Focus on experimental methodology, data collection, results analysis, statistical methods, and publication planning. Include specific measurements and equipment names.",
-    freelance: "This is a freelance developer or consultant tracking client work. Focus on deliverables completed, client communication, time tracking, billable work, and client approvals. Note any scope changes or change requests.",
-    enterprise: "This is an enterprise engineering team meeting. Focus on system architecture, stakeholder communication, cross-team dependencies, compliance requirements, incidents, and business impact. Include service names, ticket numbers, and stakeholder names when mentioned.",
+    startup: "This is a startup team meeting. Focus on product development, user feedback, growth metrics, and strategic decisions.",
+    research: "This is a research lab meeting. Focus on experiments, methodology, results analysis, and publication planning.",
+    freelance: "This is a freelance developer tracking client work. Focus on deliverables, client communication, and time tracking.",
+    enterprise: "This is an enterprise engineering team meeting. Focus on system architecture, stakeholder communication, and cross-team coordination.",
   };
+
+  if (mode === "custom") {
+    return `This is a ${customCategory || "custom"} team meeting. Focus on properly documenting the work discussed using appropriate terminology.
+
+${crewList}
+
+MEETING TRANSCRIPT:
+---
+${transcript}
+---
+
+Analyze this transcript and generate the structured documentation. Be thorough and specific. Remember: respond with valid JSON only.`;
+  }
 
   return `${modeContext[mode]}
 
@@ -161,7 +218,8 @@ export async function generateMissionLog(
   transcript: string,
   crew: string,
   mode: MissionMode,
-  title: string
+  title: string,
+  customCategory?: string
 ): Promise<MissionLog> {
   const apiKey = process.env.GLM_API_KEY;
 
@@ -178,8 +236,8 @@ export async function generateMissionLog(
     body: JSON.stringify({
       model: "glm-5.1",
       messages: [
-        { role: "system", content: getSystemPrompt(mode) },
-        { role: "user", content: getUserPrompt(transcript, crew, mode) },
+        { role: "system", content: getSystemPrompt(mode, customCategory) },
+        { role: "user", content: getUserPrompt(transcript, crew, mode, customCategory) },
       ],
       temperature: 0.4,
       max_tokens: 4096,

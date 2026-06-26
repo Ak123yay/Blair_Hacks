@@ -1,19 +1,149 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Ic } from "@/components/icons/Ic";
+import { signInWithEmail, signInWithGoogle } from "@/lib/supabase";
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1500);
+    setError(null);
+
+    try {
+      const { data, error } = await signInWithEmail(email, password);
+      
+      if (error) {
+        setError(error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        const redirectedFrom = searchParams.get("redirected_from");
+        router.push(redirectedFrom || "/dashboard");
+        router.refresh();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed");
+      setIsLoading(false);
+    }
   };
 
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const { data, error } = await signInWithGoogle();
+      
+      if (error) {
+        setError(error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Google sign-in failed");
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {error && (
+        <div style={{ padding: 12, background: "oklch(0.93 0.08 25)", border: "1px solid oklch(0.75 0.12 25)", borderRadius: 4, marginBottom: 16, fontSize: 13, color: "oklch(0.45 0.12 25)" }}>
+          {error}
+        </div>
+      )}
+
+      <div style={{ marginBottom: 20 }}>
+        <label className="mono" style={{ display: "block", marginBottom: 8 }}>
+          Email
+        </label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+          className="input"
+          required
+        />
+      </div>
+
+      <div style={{ marginBottom: 20 }}>
+        <label className="mono" style={{ display: "block", marginBottom: 8 }}>
+          Password
+        </label>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="••••••••"
+          className="input"
+          required
+        />
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
+          <input type="checkbox" style={{ accentColor: "var(--accent)" }} />
+          Remember me
+        </label>
+        <a href="/forgot-password" style={{ fontSize: 13, color: "var(--accent-ink)" }}>
+          Forgot password?
+        </a>
+      </div>
+
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="btn btn-accent btn-lg"
+        style={{ width: "100%" }}
+      >
+        {isLoading ? (
+          <>
+            <Ic name="refresh" size={16} className="animate-spin" />
+            Signing in...
+          </>
+        ) : (
+          "Sign In"
+        )}
+      </button>
+
+      <div style={{ marginTop: 24, textAlign: "center", fontSize: 13, color: "var(--ink-3)" }}>
+        Don&apos;t have an account?{" "}
+        <a href="/signup" style={{ color: "var(--accent-ink)", fontWeight: 500 }}>
+          Sign up
+        </a>
+      </div>
+
+      <div style={{ marginTop: 32, paddingTop: 32, borderTop: "1px solid var(--rule-2)" }}>
+        <button type="button" onClick={handleGoogleSignIn} className="btn btn-ghost" style={{ width: "100%", marginBottom: 12 }}>
+          <Ic name="globe" size={16} />
+          Continue with Google
+        </button>
+        <button type="button" className="btn btn-ghost" style={{ width: "100%" }}>
+          <Ic name="terminal" size={16} />
+          Continue with GitHub
+        </button>
+      </div>
+    </form>
+  );
+}
+
+export default function LoginPage() {
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       {/* LEFT - FORM */}
@@ -31,79 +161,9 @@ export default function LoginPage() {
             Sign in to access your mission logs
           </p>
 
-          <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: 20 }}>
-              <label className="mono" style={{ display: "block", marginBottom: 8 }}>
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="input"
-                required
-              />
-            </div>
-
-            <div style={{ marginBottom: 20 }}>
-              <label className="mono" style={{ display: "block", marginBottom: 8 }}>
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="input"
-                required
-              />
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
-                <input type="checkbox" style={{ accentColor: "var(--accent)" }} />
-                Remember me
-              </label>
-              <a href="/forgot-password" style={{ fontSize: 13, color: "var(--accent-ink)" }}>
-                Forgot password?
-              </a>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn btn-accent btn-lg"
-              style={{ width: "100%" }}
-            >
-              {isLoading ? (
-                <>
-                  <Ic name="refresh" size={16} className="animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                "Sign In"
-              )}
-            </button>
-          </form>
-
-          <div style={{ marginTop: 24, textAlign: "center", fontSize: 13, color: "var(--ink-3)" }}>
-            Don&apos;t have an account?{" "}
-            <a href="/signup" style={{ color: "var(--accent-ink)", fontWeight: 500 }}>
-              Sign up
-            </a>
-          </div>
-
-          <div style={{ marginTop: 32, paddingTop: 32, borderTop: "1px solid var(--rule-2)" }}>
-            <button className="btn btn-ghost" style={{ width: "100%", marginBottom: 12 }}>
-              <Ic name="globe" size={16} />
-              Continue with Google
-            </button>
-            <button className="btn btn-ghost" style={{ width: "100%" }}>
-              <Ic name="terminal" size={16} />
-              Continue with GitHub
-            </button>
-          </div>
+          <Suspense fallback={<div style={{ padding: 40, textAlign: "center" }}>Loading...</div>}>
+            <LoginForm />
+          </Suspense>
         </div>
       </div>
 
