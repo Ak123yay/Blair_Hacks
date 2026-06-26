@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import DashShell from "@/components/DashShell";
 import { Ic } from "@/components/icons/Ic";
 
 const notifications = [
@@ -80,7 +79,7 @@ export default function NotificationsPage() {
   });
 
   return (
-    <DashShell>
+    <div className="fadein-up" style={{ padding: "32px 40px" }}>
       <div style={{ marginBottom: 32 }}>
         <div className="eyebrow" style={{ marginBottom: 8 }}>Activity</div>
         <h1 className="serif" style={{ fontSize: 36, fontWeight: 400, margin: 0 }}>
@@ -242,6 +241,6 @@ export default function NotificationsPage() {
           </div>
         </div>
       </div>
-    </DashShell>
+    </div>
   );
 }

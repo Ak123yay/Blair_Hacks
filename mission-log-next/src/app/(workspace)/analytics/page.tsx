@@ -1,6 +1,5 @@
 "use client";
 
-import DashShell from "@/components/DashShell";
 import { Ic } from "@/components/icons/Ic";
 
 const stats = [
@@ -37,7 +36,7 @@ export default function AnalyticsPage() {
   const maxTasks = Math.max(...activityData.map((d) => d.tasks));
 
   return (
-    <DashShell>
+    <div className="fadein-up" style={{ padding: "32px 40px" }}>
       <div style={{ marginBottom: 32 }}>
         <div className="eyebrow" style={{ marginBottom: 8 }}>Analytics</div>
         <h1 className="serif" style={{ fontSize: 36, fontWeight: 400, margin: 0 }}>
@@ -198,6 +197,6 @@ export default function AnalyticsPage() {
           ))}
         </div>
       </div>
-    </DashShell>
+    </div>
   );
 }

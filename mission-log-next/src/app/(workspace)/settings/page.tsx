@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import DashShell from "@/components/DashShell";
 import { Ic } from "@/components/icons/Ic";
 
 export default function SettingsPage() {

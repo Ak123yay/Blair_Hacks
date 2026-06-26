@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MissionFormData, MissionMode } from "@/types/mission";
 import { Ic } from "@/components/icons/Ic";
 import { StyleSection } from "./Shared";
+import AudioUploader from "./AudioUploader";
 
 interface MissionFormProps {
   onSubmit: (data: MissionFormData) => void;
   loading: boolean;
+  initialTranscript?: string;
+  onTranscriptChange?: (transcript: string) => void;
 }
 
 const modes: { value: MissionMode; label: string; icon: string; desc: string }[] = [
@@ -21,15 +24,27 @@ const modes: { value: MissionMode; label: string; icon: string; desc: string }[]
   { value: "custom", label: "Custom", icon: "sparkle", desc: "Define your own category" },
 ];
 
-export default function MissionForm({ onSubmit, loading }: MissionFormProps) {
+export default function MissionForm({ onSubmit, loading, initialTranscript = "", onTranscriptChange }: MissionFormProps) {
   const [formData, setFormData] = useState<MissionFormData>({
     title: "",
     missionMode: "standard",
     crew: "",
-    transcript: "",
+    transcript: initialTranscript,
     projectName: "",
     customCategory: "",
   });
+
+  useEffect(() => {
+    if (initialTranscript) {
+      setFormData((f) => ({ ...f, transcript: initialTranscript }));
+      onTranscriptChange?.(initialTranscript);
+    }
+  }, [initialTranscript]);
+
+  const handleTranscriptChange = (value: string) => {
+    setFormData((f) => ({ ...f, transcript: value }));
+    onTranscriptChange?.(value);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,15 +193,48 @@ export default function MissionForm({ onSubmit, loading }: MissionFormProps) {
       </div>
 
       {/* TRANSCRIPT */}
-      <div style={{ marginTop: 18 }}>
-        <label className="mono" style={{ display: "block", marginBottom: 6 }}>
-          <Ic name="file" size={11} className="inline mr-1" /> Mission Transcript / Notes
-        </label>
+      <div style={{ marginTop: 28 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <label className="mono" style={{ display: "block" }}>
+            <Ic name="file" size={11} className="inline mr-1" /> Mission Transcript / Notes
+          </label>
+          <span className="mono" style={{ fontSize: 9, color: "var(--ink-4)" }}>
+            Or upload audio/video
+          </span>
+        </div>
+        
+        {/* AUDIO UPLOADER */}
+        {!formData.transcript && (
+          <div style={{ marginBottom: 16 }}>
+            <AudioUploader 
+              onTranscriptReady={(transcript) => {
+                handleTranscriptChange(transcript);
+              }}
+              onError={() => {}}
+              disabled={loading}
+            />
+          </div>
+        )}
+
+        {formData.transcript && (
+          <div style={{ marginBottom: 12 }}>
+            <button
+              type="button"
+              className="btn btn-soft btn-sm"
+              onClick={() => handleTranscriptChange("")}
+              style={{ fontSize: 11 }}
+            >
+              <Ic name="upload" size={12} />
+              Upload Different Audio
+            </button>
+          </div>
+        )}
+
         <textarea
-          required
-          rows={10}
+          required={!initialTranscript}
+          rows={12}
           value={formData.transcript}
-          onChange={(e) => setFormData((f) => ({ ...f, transcript: e.target.value }))}
+          onChange={(e) => handleTranscriptChange(e.target.value)}
           placeholder={`Paste your meeting notes, transcript, or rough notes here...
 
 Example:

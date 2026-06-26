@@ -1,7 +1,7 @@
 import { MissionMode, TaskAssignment, CommandDecision, SystemAnomaly, MissionLog } from "@/types/mission";
 import { v4 as uuidv4 } from "uuid";
 
-const GLM_API_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
+const NVIDIA_NIM_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 
 function getSystemPrompt(mode: MissionMode, customCategory?: string): string {
   if (mode === "custom" && customCategory) {
@@ -159,7 +159,7 @@ Analyze the meeting transcript and return JSON with this exact structure:
   if (mode === "custom") {
     return modePrompts.standard;
   }
-  
+
   return modePrompts[mode];
 }
 
@@ -179,7 +179,7 @@ ${transcript}
 Analyze this transcript and generate the structured documentation. Be thorough and specific. Include actual names, measurements, technical details, and industry-specific information when mentioned. If something is vague in the transcript, note it in missingDocumentationWarnings. Remember: respond with valid JSON only, no markdown formatting.`;
   }
 
-const modeContext: Record<Exclude<MissionMode, "custom">, string> = {
+  const modeContext: Record<Exclude<MissionMode, "custom">, string> = {
     standard: "This is a general engineering/team meeting. Focus on properly documenting the work discussed.",
     vex: "This is a VEX Robotics team meeting. Pay special attention to robot design changes, programming updates, test results with specific data, and engineering design process documentation that VEX judges expect.",
     hackathon: "This is a hackathon team meeting. Focus on feature progress, technical decisions, demo readiness, and timeline tracking.",
@@ -190,7 +190,7 @@ const modeContext: Record<Exclude<MissionMode, "custom">, string> = {
   };
 
   if (mode === "custom") {
-    return `This is a ${customCategory || "custom"} team meeting. Focus on properly documenting the work discussed using appropriate terminology.
+    return `This is a custom team meeting. Focus on properly documenting the work discussed.
 
 ${crewList}
 
@@ -211,7 +211,7 @@ MEETING TRANSCRIPT:
 ${transcript}
 ---
 
-Analyze this transcript and generate the structured documentation. Be thorough and specific. Include actual names, measurements, technical details, and metrics when mentioned. If something is vague in the transcript, note it in missingDocumentationWarnings. Remember: respond with valid JSON only, no markdown formatting.`;
+Analyze this transcript and generate the structured documentation. Be thorough and specific. Include actual names, measurements, and technical details when mentioned. If something is vague in the transcript, note it in missingDocumentationWarnings. Remember: respond with valid JSON only, no markdown formatting.`;
 }
 
 export async function generateMissionLog(
@@ -221,20 +221,20 @@ export async function generateMissionLog(
   title: string,
   customCategory?: string
 ): Promise<MissionLog> {
-  const apiKey = process.env.GLM_API_KEY;
+  const apiKey = process.env.NVIDIA_NIM_API_KEY;
 
   if (!apiKey) {
-    throw new Error("GLM_API_KEY environment variable is not set");
+    throw new Error("NVIDIA_NIM_API_KEY environment variable is not set");
   }
 
-  const response = await fetch(GLM_API_URL, {
+  const response = await fetch(NVIDIA_NIM_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "glm-5.1",
+      model: "z-ai/glm-5.1",
       messages: [
         { role: "system", content: getSystemPrompt(mode, customCategory) },
         { role: "user", content: getUserPrompt(transcript, crew, mode, customCategory) },
@@ -246,14 +246,14 @@ export async function generateMissionLog(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`GLM API error (${response.status}): ${errorText}`);
+    throw new Error(`NVIDIA NIM API error (${response.status}): ${errorText}`);
   }
 
   const data = await response.json();
   const content = data.choices?.[0]?.message?.content;
 
   if (!content) {
-    throw new Error("No content returned from GLM API");
+    throw new Error("No content returned from NVIDIA NIM API");
   }
 
   let parsed: Record<string, unknown>;
@@ -261,7 +261,7 @@ export async function generateMissionLog(
     const cleanContent = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
     parsed = JSON.parse(cleanContent);
   } catch {
-    throw new Error(`Failed to parse GLM response as JSON. Raw: ${content.substring(0, 500)}`);
+    throw new Error(`Failed to parse NVIDIA NIM response as JSON. Raw: ${content.substring(0, 500)}`);
   }
 
   const mission: MissionLog = {

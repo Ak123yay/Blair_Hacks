@@ -3,6 +3,7 @@
 import { useState } from "react";
 import MissionForm from "@/components/MissionForm";
 import MissionResults from "@/components/MissionResults";
+import AudioUploader from "@/components/AudioUploader";
 import { MissionLog, MissionFormData } from "@/types/mission";
 import { saveMission } from "@/lib/storage";
 import { Ic } from "@/components/icons/Ic";
@@ -13,6 +14,7 @@ export default function NewMissionPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [transcriptFromAudio, setTranscriptFromAudio] = useState<string>("");
 
   const handleSubmit = async (data: MissionFormData) => {
     setLoading(true);
@@ -49,12 +51,25 @@ export default function NewMissionPage() {
     }
   };
 
+  const handleTranscriptReady = (transcript: string, fileName: string) => {
+    setTranscriptFromAudio(transcript);
+  };
+
+  const handleAudioError = (errorMsg: string) => {
+    setError(errorMsg);
+  };
+
   return (
     <DashShell>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
         {!result && !loading && (
           <div className="card" style={{ padding: "40px 48px" }}>
-            <MissionForm onSubmit={handleSubmit} loading={loading} />
+            <MissionForm 
+              onSubmit={handleSubmit} 
+              loading={loading}
+              initialTranscript={transcriptFromAudio}
+              onTranscriptChange={setTranscriptFromAudio}
+            />
           </div>
         )}
 
