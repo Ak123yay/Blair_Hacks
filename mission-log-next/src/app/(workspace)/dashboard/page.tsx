@@ -5,7 +5,6 @@ import MissionCard from "@/components/MissionCard";
 import { MissionLog } from "@/types/mission";
 import { getMissionsLocal, deleteMission as removeMission, getUniqueProjectsLocal } from "@/lib/storage";
 import { Ic } from "@/components/icons/Ic";
-import DashShell from "@/components/DashShell";
 
 export default function DashboardPage() {
   const [missions, setMissions] = useState<MissionLog[]>([]);
@@ -41,8 +40,7 @@ export default function DashboardPage() {
   });
 
   return (
-    <DashShell>
-      <div className="fadein-up">
+    <div className="fadein-up">
         {/* HEADER */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 28 }}>
           <div>
@@ -118,6 +116,6 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
-    </DashShell>
+    </div>
   );
 }
