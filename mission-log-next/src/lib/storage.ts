@@ -88,8 +88,8 @@ export async function getMissionsByProject(projectName: string): Promise<Mission
   );
 }
 
-export async function getUniqueProjects(): Promise<string[]> {
-  const missions = await getMissions();
+export function getUniqueProjectsLocal(): string[] {
+  const missions = getMissionsLocal();
   const projects = new Set(missions.map((m) => m.projectName));
   return Array.from(projects).filter(Boolean);
 }

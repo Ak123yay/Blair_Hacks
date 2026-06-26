@@ -6,9 +6,13 @@ import { Ic } from "./icons/Ic";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
-  { href: "/", label: "New Mission", icon: "plus" },
+  { href: "/", label: "Home", icon: "home" },
+  { href: "/new", label: "New Mission", icon: "plus" },
   { href: "/dashboard", label: "Dashboard", icon: "sites" },
   { href: "/timeline", label: "Timeline", icon: "clock" },
+  { href: "/analytics", label: "Analytics", icon: "chart" },
+  { href: "/team", label: "Team", icon: "users" },
+  { href: "/help", label: "Help", icon: "help" },
 ];
 
 export default function Navbar() {

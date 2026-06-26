@@ -291,7 +291,9 @@ export default function SettingsPage() {
 
               <div style={{ fontSize: 14, marginBottom: 16 }}>Billing History</div>
               <div style={{ textAlign: "center", padding: 40, color: "var(--ink-3)" }}>
-                <Ic name="file" size={24} style={{ marginBottom: 12 }} />
+                <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}>
+                  <Ic name="file" size={24} />
+                </div>
                 <div>No billing history yet</div>
               </div>
             </div>

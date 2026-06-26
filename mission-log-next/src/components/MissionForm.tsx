@@ -14,6 +14,10 @@ const modes: { value: MissionMode; label: string; icon: string; desc: string }[]
   { value: "standard", label: "Standard", icon: "clipboard-check", desc: "General engineering team" },
   { value: "vex", label: "VEX Robotics", icon: "cpu", desc: "VEX competition notebook" },
   { value: "hackathon", label: "Hackathon", icon: "code", desc: "Sprint build & demo prep" },
+  { value: "startup", label: "Startup", icon: "rocket", desc: "Product & growth tracking" },
+  { value: "research", label: "Research Lab", icon: "book", desc: "Experiments & publications" },
+  { value: "freelance", label: "Freelance", icon: "user", desc: "Client work & deliverables" },
+  { value: "enterprise", label: "Enterprise", icon: "database", desc: "Corporate engineering teams" },
 ];
 
 export default function MissionForm({ onSubmit, loading }: MissionFormProps) {
@@ -45,7 +49,7 @@ export default function MissionForm({ onSubmit, loading }: MissionFormProps) {
 
       {/* MODE SELECTION */}
       <StyleSection label="Mission Mode" hint="Choose the documentation style">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
           {modes.map((mode) => (
             <button
               key={mode.value}

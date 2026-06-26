@@ -1,4 +1,4 @@
-export type MissionMode = "standard" | "vex" | "hackathon";
+export type MissionMode = "standard" | "vex" | "hackathon" | "startup" | "research" | "freelance" | "enterprise";
 
 export interface TaskAssignment {
   task: string;

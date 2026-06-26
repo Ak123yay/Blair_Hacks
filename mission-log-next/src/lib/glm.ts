@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 const GLM_API_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
 
 function getSystemPrompt(mode: MissionMode): string {
-  const basePrompt = `You are MissionLog AI, an engineering documentation assistant for student robotics, hackathon, and engineering teams. You analyze meeting transcripts and generate structured, judge-ready engineering documentation.
+  const basePrompt = `You are MissionLog AI, an engineering documentation assistant for tech teams including robotics, hackathons, startups, research labs, freelance developers, and enterprise teams. You analyze meeting transcripts and generate structured, professional documentation.
 
 THEME: You use space mission terminology. Meetings are "Missions", engineering notebooks are "Flight Logs", tasks are "Objectives", team members are "Crew", bugs/problems are "System Anomalies", design decisions are "Command Decisions", and next steps are "Launch Checklist" items.
 
@@ -16,31 +16,31 @@ You MUST respond with valid JSON only. No markdown, no code fences, no extra tex
 Analyze the meeting transcript and return JSON with this exact structure:
 {
   "summary": "Concise mission summary (2-4 sentences)",
-  "engineeringNotebookEntry": "A formal engineering notebook entry formatted like: Date, Mission Title, Crew Present, Objectives, Work Completed, Design Changes & Rationale, Test Results, Next Steps. Write in past tense, third person where appropriate. This should be competition-judge quality.",
+  "engineeringNotebookEntry": "A formal engineering notebook entry formatted like: Date, Mission Title, Crew Present, Objectives, Work Completed, Design Changes & Rationale, Test Results, Next Steps. Write in past tense, third person where appropriate.",
   "commandDecisions": [{"decision": "what was decided", "rationale": "why it was decided", "madeBy": "who decided or 'Team'", "impact": "expected impact"}],
   "taskAssignments": [{"task": "what needs to be done", "assignee": "person name or 'Unassigned'", "dueDate": "if mentioned or 'Not specified'", "priority": "CRITICAL|HIGH|MEDIUM|LOW", "status": "PENDING"}],
   "systemAnomalies": [{"problem": "what went wrong or what bug was found", "context": "surrounding context", "severity": "CRITICAL|HIGH|MEDIUM|LOW", "suggestedFix": "how to resolve it"}],
   "nextMissionGoals": ["goal1", "goal2", ...],
-  "proofChecklist": ["documentation items that need proof/evidence recorded", "e.g. 'Record PID tuning results'", 'Screenshot of working autonomous path', etc.],
-  "judgeRecap": "A paragraph explaining what was accomplished, what changed, and why - suitable for presenting to competition judges",
-  "missingDocumentationWarnings": ["warnings about stuff mentioned but not properly documented", "e.g. 'You mentioned testing PID but didn't record the results'"]
+  "proofChecklist": ["documentation items that need proof/evidence recorded"],
+  "judgeRecap": "A paragraph explaining what was accomplished, what changed, and why",
+  "missingDocumentationWarnings": ["warnings about stuff mentioned but not properly documented"]
 }`,
 
     vex: `${basePrompt}
 
-VEX ROBOTICS MODE: This is a VEX Robotics team meeting. Generate documentation specifically formatted for VEX engineering notebooks. VEX judges look for: clear design process documentation, iteration tracking, test results with data, decision matrices, and evidence of the engineering design process (define problem -> research -> brainstorm -> select -> prototype -> test -> iterate).
+VEX ROBOTICS MODE: This is a VEX Robotics team meeting. Generate documentation specifically formatted for VEX engineering notebooks. VEX judges look for: clear design process documentation, iteration tracking, test results with data, decision matrices, and evidence of the engineering design process.
 
 Analyze the meeting transcript and return JSON with this exact structure:
 {
   "summary": "Concise mission summary (2-4 sentences)",
-  "engineeringNotebookEntry": "VEX Engineering Notebook Entry with these sections: **Date & Mission Number**, **Crew Present**, **Problem Definition** (what design challenge was being addressed), **Research & Brainstorming** (ideas discussed), **Design Decision** (what was chosen and WHY with decision matrix if applicable), **Prototype/Build Progress** (what was built/modified with specifics - part names, measurements, code changes), **Testing & Results** (include specific data - distances, times, scores, success rates), **Iteration Notes** (what needs to change based on testing), **Next Steps**. Use formal technical language. Include specific measurements, part numbers, and code references when mentioned.",
-  "commandDecisions": [{"decision": "design decision made", "rationale": "engineering justification - why this option over alternatives", "madeBy": "crew member name or 'Team'", "impact": "how this affects the robot design/performance"}],
+  "engineeringNotebookEntry": "VEX Engineering Notebook Entry with sections: **Date & Mission Number**, **Crew Present**, **Problem Definition**, **Research & Brainstorming**, **Design Decision** (with decision matrix if applicable), **Prototype/Build Progress** (part names, measurements, code changes), **Testing & Results** (specific data - distances, times, scores), **Iteration Notes**, **Next Steps**. Use formal technical language.",
+  "commandDecisions": [{"decision": "design decision made", "rationale": "engineering justification", "madeBy": "crew member name or 'Team'", "impact": "how this affects robot design/performance"}],
   "taskAssignments": [{"task": "build/program/test task", "assignee": "crew member or 'Unassigned'", "dueDate": "if mentioned or 'Before next meeting'", "priority": "CRITICAL|HIGH|MEDIUM|LOW", "status": "PENDING"}],
-  "systemAnomalies": [{"problem": "mechanical failure, code bug, or design issue found", "context": "what was happening when discovered", "severity": "CRITICAL|HIGH|MEDIUM|LOW", "suggestedFix": "proposed solution or troubleshooting step"}],
-  "nextMissionGoals": ["specific build/program/test objectives for next session"],
-  "proofChecklist": ["VEX-specific documentation items needed: photos of robot, screenshots of code, test data tables, decision matrices, CAD screenshots, match scouting notes"],
-  "judgeRecap": "A paragraph suitable for VEX judge interview: what design problem was addressed, what solution was implemented, what data supports the decision, what iteration occurred, and what the result was. Emphasize the engineering design process.",
-  "missingDocumentationWarnings": ["VEX-specific warnings like 'You mentioned your autonomous but didn't record timeout values', 'No test data was mentioned for the new drivetrain', 'Design decision lacks comparison to alternatives']
+  "systemAnomalies": [{"problem": "mechanical failure, code bug, or design issue", "context": "what was happening when discovered", "severity": "CRITICAL|HIGH|MEDIUM|LOW", "suggestedFix": "proposed solution"}],
+  "nextMissionGoals": ["specific build/program/test objectives"],
+  "proofChecklist": ["VEX-specific: photos of robot, code screenshots, test data tables, decision matrices, CAD screenshots"],
+  "judgeRecap": "Paragraph for VEX judges: design problem, solution implemented, data supporting decision, iteration occurred, and result. Emphasize engineering design process.",
+  "missingDocumentationWarnings": ["VEX-specific warnings like missing test data, undocumented design comparisons"]
 }`,
 
     hackathon: `${basePrompt}
@@ -50,15 +50,83 @@ HACKATHON MODE: This is a hackathon team meeting. Generate documentation for rap
 Analyze the meeting transcript and return JSON with this exact structure:
 {
   "summary": "Concise mission summary (2-4 sentences)",
-  "engineeringNotebookEntry": "Hackathon Build Log with sections: **Timeline & Sprint** (time block and focus area), **Crew Present & Roles**, **Features Completed** (what was built/working), **Features In Progress** (what's being worked on), **Technical Decisions** (tech stack choices, architecture decisions, tradeoffs), **Blockers & Issues** (what's preventing progress), **Demo Script Progress** (what's ready to demo, what's the demo flow), **Pitch Talking Points** (key points for presentation). Be specific about tech: frameworks used, APIs integrated, features implemented.",
-  "commandDecisions": [{"decision": "technical or product decision made", "rationale": "why this approach/technology/feature", "madeBy": "crew member or 'Team'", "impact": "how this affects the build/demo/timeline"}],
-  "taskAssignments": [{"task": "feature to build, API to integrate, slide to make, etc.", "assignee": "crew member or 'Unassigned'", "dueDate": "deadline or 'Before demo'", "priority": "CRITICAL|HIGH|MEDIUM|LOW", "status": "PENDING"}],
-  "systemAnomalies": [{"problem": "bug, deployment issue, scope creep, merge conflict, etc.", "context": "surrounding context", "severity": "CRITICAL|HIGH|MEDIUM|LOW", "suggestedFix": "proposed solution or workaround"}],
-  "nextMissionGoals": ["features to complete, tests to run, demo prep tasks"],
-  "proofChecklist": ["hackathon documentation: working demo recording, GitHub repo link, API documentation, screenshots of key features, deployment URL, pitch deck"],
-  "judgeRecap": "A paragraph for hackathon judges: what problem was solved, what tech stack was used, what makes the solution innovative, what was accomplished in the time constraint, and a demo walkthrough summary.",
-  "missingDocumentationWarnings": ["hackathon-specific warnings: 'No deployment testing was recorded', 'API error handling not documented', 'Demo flow not practiced', 'No backup plan if live demo fails']"]
+  "engineeringNotebookEntry": "Hackathon Build Log with sections: **Timeline & Sprint**, **Crew Present & Roles**, **Features Completed**, **Features In Progress**, **Technical Decisions** (tech stack, architecture, tradeoffs), **Blockers & Issues**, **Demo Script Progress**, **Pitch Talking Points**. Be specific about tech: frameworks, APIs, features.",
+  "commandDecisions": [{"decision": "technical or product decision", "rationale": "why this approach/technology", "madeBy": "crew member or 'Team'", "impact": "how this affects build/demo/timeline"}],
+  "taskAssignments": [{"task": "feature, API, slide, etc.", "assignee": "crew member or 'Unassigned'", "dueDate": "deadline or 'Before demo'", "priority": "CRITICAL|HIGH|MEDIUM|LOW", "status": "PENDING"}],
+  "systemAnomalies": [{"problem": "bug, deployment issue, scope creep", "context": "surrounding context", "severity": "CRITICAL|HIGH|MEDIUM|LOW", "suggestedFix": "proposed solution"}],
+  "nextMissionGoals": ["features to complete, demo prep tasks"],
+  "proofChecklist": ["hackathon docs: demo recording, GitHub repo, API docs, screenshots, deployment URL, pitch deck"],
+  "judgeRecap": "Paragraph for hackathon judges: problem solved, tech stack, innovation, accomplishments in time constraint, demo summary.",
+  "missingDocumentationWarnings": ["hackathon warnings: no deployment testing, undocumented error handling, no backup plan"]
 }`,
+
+    startup: `${basePrompt}
+
+STARTUP MODE: This is a startup team meeting. Generate documentation focused on product development, user feedback, growth metrics, and strategic decisions.
+
+Analyze the meeting transcript and return JSON with this exact structure:
+{
+  "summary": "Concise mission summary (2-4 sentences)",
+  "engineeringNotebookEntry": "Startup Build Log with sections: **Date & Sprint**, **Team Present**, **Product Updates** (features shipped, changes made), **User Feedback** (customer insights, support tickets, NPS scores), **Metrics & KPIs** (DAU, MAU, conversion rates, MRR if discussed), **Technical Decisions** (architecture, tech stack, scaling decisions), **Business Decisions** (pricing, partnerships, hiring), **Blockers** (technical debt, resource constraints), **Next Sprint Goals**. Include specific numbers and metrics when mentioned.",
+  "commandDecisions": [{"decision": "product, technical, or business decision", "rationale": "data or reasoning behind decision", "madeBy": "founder/team member name or 'Team'", "impact": "expected impact on product, users, or business"}],
+  "taskAssignments": [{"task": "feature, experiment, analysis, or operational task", "assignee": "team member or 'Unassigned'", "dueDate": "deadline or 'End of sprint'", "priority": "CRITICAL|HIGH|MEDIUM|LOW", "status": "PENDING"}],
+  "systemAnomalies": [{"problem": "production issue, user complaint, technical debt, or business challenge", "context": "surrounding context", "severity": "CRITICAL|HIGH|MEDIUM|LOW", "suggestedFix": "proposed solution or mitigation"}],
+  "nextMissionGoals": ["product milestones, experiments to run, metrics to track"],
+  "proofChecklist": ["startup docs: analytics dashboards, user interview notes, A/B test results, feature flags, deployment logs, investor updates"],
+  "judgeRecap": "Paragraph summarizing: what problem the startup is solving, what was accomplished this sprint, key metrics moved, what was learned from users, and what's next. Suitable for investor updates or advisor check-ins.",
+  "missingDocumentationWarnings": ["startup warnings: 'No metrics were recorded for the new feature', 'User feedback mentioned but not quantified', 'No success criteria defined for experiment']
+}`,
+
+    research: `${basePrompt}
+
+RESEARCH MODE: This is a research lab or academic team meeting. Generate documentation focused on experiments, methodology, results analysis, and publication planning.
+
+Analyze the meeting transcript and return JSON with this exact structure:
+{
+  "summary": "Concise mission summary (2-4 sentences)",
+  "engineeringNotebookEntry": "Research Lab Log with sections: **Date & Experiment ID**, **Researchers Present**, **Hypothesis/Objective**, **Methodology** (experimental setup, equipment used, parameters), **Data Collected** (measurements, observations, raw data references), **Results Analysis** (statistical analysis, patterns observed, anomalies), **Conclusions** (hypothesis supported/refuted, insights gained), **Next Experiments**, **Publication Notes** (paper progress, figures to create, co-author tasks). Include specific measurements, equipment names, and statistical methods.",
+  "commandDecisions": [{"decision": "experimental design, methodology, or analysis decision", "rationale": "scientific justification", "madeBy": "researcher name or 'Team'", "impact": "how this affects research direction or results"}],
+  "taskAssignments": [{"task": "experiment to run, analysis to perform, figure to create, section to write", "assignee": "researcher name or 'Unassigned'", "dueDate": "deadline or 'Before next meeting'", "priority": "CRITICAL|HIGH|MEDIUM|LOW", "status": "PENDING"}],
+  "systemAnomalies": [{"problem": "equipment malfunction, contaminated data, unexpected results, or methodology issue", "context": "experimental context", "severity": "CRITICAL|HIGH|MEDIUM|LOW", "suggestedFix": "troubleshooting step or methodological adjustment"}],
+  "nextMissionGoals": ["experiments to replicate, new hypotheses to test, analyses to complete, manuscript sections to write"],
+  "proofChecklist": ["research docs: lab notebook entries, raw data files, statistical analysis code, figures/plots, IRB approvals, equipment calibration logs"],
+  "judgeRecap": "Paragraph summarizing: research question being investigated, experimental approach, key findings, how results advance the field, and next steps. Suitable for lab meetings, advisor updates, or grant reports.",
+  "missingDocumentationWarnings": ["research warnings: 'Control conditions not specified', 'Sample size not mentioned', 'Statistical test not documented', 'No mention of reproducibility measures']
+}`,
+
+    freelance: `${basePrompt}
+
+FREELANCE MODE: This is a freelance developer or consultant tracking client work. Generate documentation focused on deliverables, client communication, time tracking, and invoicing.
+
+Analyze the meeting transcript and return JSON with this exact structure:
+{
+  "summary": "Concise mission summary (2-4 sentences)",
+  "engineeringNotebookEntry": "Freelance Project Log with sections: **Date & Client**, **Project/Phase**, **Work Completed** (specific deliverables, features built, bugs fixed), **Client Communication** (feedback received, decisions approved, change requests), **Time Spent** (if mentioned), **Technical Implementation** (tools, frameworks, code changes), **Blockers** (waiting on client, technical challenges), **Next Deliverables**, **Invoice Notes** (billable hours, milestones reached). Be specific about what was delivered and client approvals.",
+  "commandDecisions": [{"decision": "technical approach, scope change, or client request", "rationale": "client need or technical constraint", "madeBy": "freelancer or 'Client'", "impact": "how this affects timeline, scope, or budget"}],
+  "taskAssignments": [{"task": "feature to build, revision to make, documentation to write, client follow-up", "assignee": "freelancer name or 'Client (pending)'", "dueDate": "deadline or 'Before next deliverable'", "priority": "CRITICAL|HIGH|MEDIUM|LOW", "status": "PENDING"}],
+  "systemAnomalies": [{"problem": "bug found, scope creep, client delay, payment issue, or technical blocker", "context": "project context", "severity": "CRITICAL|HIGH|MEDIUM|LOW", "suggestedFix": "solution or client communication needed"}],
+  "nextMissionGoals": ["deliverables to complete, client meetings to schedule, invoices to send"],
+  "proofChecklist": ["freelance docs: commit logs, deployed features, client approval emails, time tracking screenshots, invoice records, change order forms"],
+  "judgeRecap": "Paragraph summarizing: what client project this is for, what deliverables were completed, any scope changes or challenges, client satisfaction, and what's next. Suitable for portfolio case studies or weekly client updates.",
+  "missingDocumentationWarnings": ["freelance warnings: 'Hours not tracked for this task', 'Client approval not documented', 'Scope change without change order', 'No estimate provided for next phase']
+}`,
+
+    enterprise: `${basePrompt}
+
+ENTERPRISE MODE: This is an enterprise/corporate engineering team meeting. Generate documentation focused on system architecture, stakeholder communication, compliance, and cross-team coordination.
+
+Analyze the meeting transcript and return JSON with this exact structure:
+{
+  "summary": "Concise mission summary (2-4 sentences)",
+  "engineeringNotebookEntry": "Enterprise Engineering Log with sections: **Date & Project**, **Team Members Present**, **System/Service Discussed**, **Architecture Decisions** (design patterns, infrastructure changes, API contracts), **Implementation Progress** (sprint status, features shipped, deployments), **Stakeholder Updates** (business requirements, executive feedback, compliance needs), **Cross-Team Dependencies** (blocking teams, integration points), **Incidents/Outages** (if any, with root cause), **Security & Compliance** (audits, PII handling, SOC2 requirements), **Next Sprint OKRs**. Include ticket numbers, service names, and stakeholder names when mentioned.",
+  "commandDecisions": [{"decision": "architecture, infrastructure, or process decision", "rationale": "business need, technical constraint, or stakeholder requirement", "madeBy": "engineer/PM/stakeholder name or 'Team'", "impact": "how this affects system reliability, scalability, cost, or timeline"}],
+  "taskAssignments": [{"task": "feature, bug fix, infrastructure change, documentation, or stakeholder follow-up", "assignee": "engineer name, team name, or 'TBD'", "dueDate": "sprint deadline or specific date", "priority": "CRITICAL|HIGH|MEDIUM|LOW", "status": "PENDING"}],
+  "systemAnomalies": [{"problem": "production incident, performance degradation, security vulnerability, or technical debt", "context": "system/service affected", "severity": "CRITICAL|HIGH|MEDIUM|LOW", "suggestedFix": "remediation plan, runbook reference, or escalation path"}],
+  "nextMissionGoals": ["sprint objectives, stakeholder meetings, compliance deadlines, system migrations"],
+  "proofChecklist": ["enterprise docs: architecture diagrams, API documentation, runbooks, incident reports, compliance checklists, stakeholder presentations, sprint retrospectives"],
+  "judgeRecap": "Paragraph summarizing: what business problem or system need was addressed, technical approach taken, stakeholder alignment achieved, risks mitigated, and next priorities. Suitable for leadership updates or quarterly business reviews.",
+  "missingDocumentationWarnings": ["enterprise warnings: 'No runbook updated for this change', 'Stakeholder sign-off not documented', 'No rollback plan mentioned', 'Compliance review not scheduled', 'No monitoring/alerting defined']
+}`
   };
 
   return modePrompts[mode];
@@ -71,6 +139,10 @@ function getUserPrompt(transcript: string, crew: string, mode: MissionMode): str
     standard: "This is a general engineering/team meeting. Focus on properly documenting the work discussed.",
     vex: "This is a VEX Robotics team meeting. Pay special attention to robot design changes, programming updates, test results with specific data, and engineering design process documentation that VEX judges expect.",
     hackathon: "This is a hackathon team meeting. Focus on feature progress, technical decisions, demo readiness, and timeline tracking.",
+    startup: "This is a startup team meeting. Focus on product development, user feedback, growth metrics, business decisions, and strategic direction. Include specific numbers and KPIs when mentioned.",
+    research: "This is a research lab or academic team meeting. Focus on experimental methodology, data collection, results analysis, statistical methods, and publication planning. Include specific measurements and equipment names.",
+    freelance: "This is a freelance developer or consultant tracking client work. Focus on deliverables completed, client communication, time tracking, billable work, and client approvals. Note any scope changes or change requests.",
+    enterprise: "This is an enterprise engineering team meeting. Focus on system architecture, stakeholder communication, cross-team dependencies, compliance requirements, incidents, and business impact. Include service names, ticket numbers, and stakeholder names when mentioned.",
   };
 
   return `${modeContext[mode]}
@@ -82,7 +154,7 @@ MEETING TRANSCRIPT:
 ${transcript}
 ---
 
-Analyze this transcript and generate the structured documentation. Be thorough and specific. Include actual names, measurements, and technical details when mentioned. If something is vague in the transcript, note it in missingDocumentationWarnings. Remember: respond with valid JSON only, no markdown formatting.`;
+Analyze this transcript and generate the structured documentation. Be thorough and specific. Include actual names, measurements, technical details, and metrics when mentioned. If something is vague in the transcript, note it in missingDocumentationWarnings. Remember: respond with valid JSON only, no markdown formatting.`;
 }
 
 export async function generateMissionLog(

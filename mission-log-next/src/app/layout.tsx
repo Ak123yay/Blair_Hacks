@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MissionLog — AI Engineering Notebook",
+  title: "MissionLog — AI Meeting Notes for Tech Teams",
   description:
-    "Turn messy team meetings into organized engineering logs, task lists, and judge-ready progress summaries for robotics and hackathon teams.",
+    "Turn messy meeting transcripts into organized documentation for robotics, hackathons, startups, research labs, freelance work, and enterprise teams. AI-powered engineering notebooks, task tracking, and stakeholder summaries.",
 };
 
 export default function RootLayout({

@@ -92,7 +92,7 @@ export const Ic = forwardRef<SVGSVGElement, IconProps>(({ name, size = 16, color
     folder: <><path d="M22 19 a2 2 0 0 1 -2 2 H4 a2 2 0 0 1 -2 -2 V5 a2 2 0 0 1 2 -2 h5 l2 3 h9 a2 2 0 0 1 2 2 z" {...s} /></>,
     database: <><ellipse cx="12" cy="5" rx="9" ry="3" {...s} /><path d="M3 5 V19 A9 3 0 0 0 21 19 V5" {...s} /><path d="M21 12 H3" {...s} /></>,
     cpu: <><rect x="4" y="4" width="16" height="16" rx="2" {...s} /><path d="M4 8 h16 M4 12 h16 M4 16 h16" {...s} /><path d="M9 4 V2 M15 4 V2 M9 22 V20 M15 22 V20 M4 9 V4 M4 15 V20 M20 9 V4 M20 15 V20" {...s} /></>,
-    code: <><path d="M16 18 l-4 -4 4 -4 M8 6 l4 4 -4 4" {...s} /></>,
+code: <><path d="M16 18 l-4 -4 4 -4 M8 6 l4 4 -4 4" {...s} /></>,
     terminal: <><path d="M4 17 l5 -5 -5 -5 M12 19 h8" {...s} /></>,
     chart: <><path d="M3 3 v18 h18 M7 14 l4 -4 l4 4 l5 -6" {...s} /></>,
     "bar-chart": <><path d="M3 3 v18 h18 M7 16 v-6 M12 16 v-9 M17 16 v-3" {...s} /></>,
@@ -100,7 +100,7 @@ export const Ic = forwardRef<SVGSVGElement, IconProps>(({ name, size = 16, color
     "trending-up": <><path d="M3 17 l6 -6 l4 4 l8 -8" {...s} /><path d="M14 7 h7 v7" {...s} /></>,
     "trending-down": <><path d="M3 7 l6 6 l4 -4 l8 8" {...s} /><path d="M14 17 h7 v-7" {...s} /></>,
     dollar: <><path d="M12 3 v18 M8 7 h8 M8 17 h8" {...s} /><path d="M12 7 a4 4 0 0 0 -4 4 a4 4 0 0 0 4 4 a4 4 0 0 0 4 -4" {...s} /></>,
-    credit-card: <><rect x="3" y="5" width="18" height="14" rx="2" {...s} /><path d="M3 10 h18" {...s} /></>,
+    "credit-card": <><rect x="3" y="5" width="18" height="14" rx="2" {...s} /><path d="M3 10 h18" {...s} /></>,
     crown: <><path d="M12 6 l4 4 l6 -4 v12 h-20 v-12 l6 4 z" {...s} /></>,
     gift: <><path d="M12 3 v18 M3 8 h18 M7 8 v13 M17 8 v13" {...s} /><path d="M12 8 a3 3 0 0 0 3 -3 a3 3 0 0 0 -3 3 z" {...s} /></>,
     message: <><path d="M21 15 a2 2 0 0 1 -2 2 H7 l-4 4 V5 a2 2 0 0 1 2 -2 h14 a2 2 0 0 1 2 2 z" {...s} /></>,
@@ -108,7 +108,6 @@ export const Ic = forwardRef<SVGSVGElement, IconProps>(({ name, size = 16, color
     help: <><circle cx="12" cy="12" r="9" {...s} /><path d="M9.09 9 a3 3 0 0 1 5.83 1 c0 2 -3 3 -3 3 M12 17 h.01" {...s} /></>,
     "life-buoy": <><circle cx="12" cy="12" r="9" {...s} /><path d="M12 3 v9 M12 21 v-9 M3 12 h9 M21 12 h-9" {...s} /><circle cx="12" cy="12" r="3" {...s} /></>,
     "log-out": <><path d="M9 21 H4 V3 H9 M16 17 L21 12 L16 7 M21 12 H9" {...s} /></>,
-    search: <><circle cx="11" cy="11" r="7" {...s} /><path d="M16 16 L21 21" {...s} /></>,
   };
 
   return (
