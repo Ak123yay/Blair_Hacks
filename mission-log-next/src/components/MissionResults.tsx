@@ -5,11 +5,17 @@ import { MissionLog } from "@/types/mission";
 import { Ic } from "@/components/icons/Ic";
 import {
   getDesignMemory,
+  getDecisionGraph,
+  getEvidenceClaimMatches,
   getEvidenceVault,
   getJudgeBrief,
+  getJudgeReadinessReport,
   getJudgeReadinessScore,
+  getNotebookMode,
   getNotebookHtml,
   getNotebookPage,
+  getFollowUpQuestions,
+  getTestingTable,
 } from "@/lib/mission-derived";
 
 interface MissionResultsProps {
@@ -51,6 +57,12 @@ export default function MissionResults({ mission, onSave, saved }: MissionResult
   const evidenceVault = getEvidenceVault(mission);
   const designMemory = getDesignMemory(mission);
   const judgeReadiness = getJudgeReadinessScore(mission);
+  const readinessReport = getJudgeReadinessReport(mission);
+  const claimMatches = getEvidenceClaimMatches(mission);
+  const followUpQuestions = getFollowUpQuestions(mission);
+  const decisionGraph = getDecisionGraph(mission);
+  const notebookMode = getNotebookMode(mission);
+  const testingTable = getTestingTable(mission);
 
   const downloadNotebookHtml = () => {
     const blob = new Blob([getNotebookHtml(mission)], { type: "text/html" });
@@ -65,21 +77,21 @@ export default function MissionResults({ mission, onSave, saved }: MissionResult
   const exportNotebookPdf = () => {
     setExportMessage(null);
 
-    const notebookWindow = window.open("", "_blank");
+    const blob = new Blob([getNotebookHtml(mission)], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const notebookWindow = window.open(url, "_blank");
     if (!notebookWindow) {
       downloadNotebookHtml();
+      URL.revokeObjectURL(url);
       setExportMessage("Popup blocked. Downloaded the notebook HTML instead; open it and print to PDF.");
       return;
     }
-
-    notebookWindow.document.open();
-    notebookWindow.document.write(getNotebookHtml(mission));
-    notebookWindow.document.close();
     notebookWindow.focus();
 
     setExportMessage("Print dialog opened. Choose Save as PDF.");
     notebookWindow.setTimeout(() => {
       notebookWindow.print();
+      URL.revokeObjectURL(url);
     }, 300);
   };
 
@@ -129,7 +141,7 @@ export default function MissionResults({ mission, onSave, saved }: MissionResult
             type="button"
           >
             <Ic name="download" size={14} />
-            Export PDF
+            Export Final PDF
           </button>
           <button
             onClick={onSave}
@@ -166,6 +178,89 @@ export default function MissionResults({ mission, onSave, saved }: MissionResult
         ))}
       </div>
 
+      <div className="intelligence-grid" style={{ marginBottom: 16 }}>
+        <div id="follow-up-questions" className="card" style={{ padding: 22 }}>
+          <div className="mono" style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+            <Ic name="shield" size={12} color="var(--accent-ink)" />
+            Evidence-to-Claim Check
+          </div>
+          <div className="claim-match-table">
+            <div className="claim-match-row claim-match-head">
+              <span>Claim</span>
+              <span>Evidence</span>
+              <span>Status</span>
+            </div>
+            {(claimMatches.length
+              ? claimMatches
+              : [{ claim: "No claims found", evidence: "Add a result, decision, or test note.", status: "Missing", source: "Mission log" }]
+            ).map((match) => (
+              <div className="claim-match-row" key={`${match.claim}-${match.evidence}`}>
+                <span>{match.claim}</span>
+                <span>{match.evidence}</span>
+                <span>
+                  <b className={`claim-status claim-status-${match.status.toLowerCase()}`}>{match.status}</b>
+                  <small>{match.source}</small>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="card" style={{ padding: 22 }}>
+          <div className="mono" style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+            <Ic name="message" size={12} color="var(--accent-ink)" />
+            AI Follow-Up Questions
+          </div>
+          <div style={{ display: "grid", gap: 10 }}>
+            {(followUpQuestions.length
+              ? followUpQuestions
+              : [{ question: "No follow-up questions needed yet.", reason: "Current mission has enough core documentation to review." }]
+            ).map((item) => (
+              <div key={item.question} className="card-soft followup-item">
+                <strong>{item.question}</strong>
+                <p>{item.reason}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="card" style={{ padding: 22, marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 14 }}>
+          <div>
+            <div className="mono" style={{ marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+              <Ic name="chart" size={12} color="var(--accent-ink)" />
+              Design Decision Graph
+            </div>
+            <p style={{ margin: 0, color: "var(--ink-3)", fontSize: 13.5, lineHeight: 1.55 }}>
+              Tracks how a problem becomes a decision, evidence, result, and next iteration.
+            </p>
+          </div>
+          <div className="readiness-pill">
+            <span>{readinessReport.score}%</span>
+            <small>ready</small>
+          </div>
+        </div>
+        <div className="decision-graph">
+          {decisionGraph.map((node, index) => (
+            <div className="decision-graph-node" key={node.id}>
+              <span>{node.kind}</span>
+              <strong>{node.label}</strong>
+              <p>{node.detail}</p>
+              {index < decisionGraph.length - 1 && <i aria-hidden="true" />}
+            </div>
+          ))}
+        </div>
+        {readinessReport.missing.length > 0 && (
+          <div className="readiness-gaps">
+            <div className="mono">Readiness gaps</div>
+            <ul>
+              {readinessReport.missing.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </div>
+        )}
+      </div>
+
       {/* FULL NOTEBOOK PAGE */}
       <div className="card mission-notebook-page" style={{ padding: 28, marginBottom: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 14, alignItems: "flex-start", marginBottom: 18 }}>
@@ -178,7 +273,7 @@ export default function MissionResults({ mission, onSave, saved }: MissionResult
               {notebookPage.project} - {new Date(notebookPage.date).toLocaleDateString()}
             </p>
           </div>
-          <span className="badge badge-accent">Full page</span>
+          <span className="badge badge-accent">{notebookMode}</span>
         </div>
 
         <div className="notebook-section-grid">
@@ -191,16 +286,28 @@ export default function MissionResults({ mission, onSave, saved }: MissionResult
             <p>{notebookPage.goal}</p>
           </section>
           <section>
+            <h4>Starting Problem</h4>
+            <p>{notebookPage.startingProblem || "Not documented"}</p>
+          </section>
+          <section>
+            <h4>Investigation / Diagnosis</h4>
+            <p>{notebookPage.rootCause || "Not documented"}</p>
+          </section>
+          <section>
             <h4>Work Completed</h4>
             <p>{notebookPage.workCompleted}</p>
           </section>
           <section>
-            <h4>Testing Performed</h4>
-            <p>{notebookPage.testingPerformed}</p>
+            <h4>Change Made</h4>
+            <p>{notebookPage.changeMade || "Not documented"}</p>
           </section>
           <section>
-            <h4>Results</h4>
-            <p>{notebookPage.results}</p>
+            <h4>Testing Procedure</h4>
+            <p>{notebookPage.testProcedure || notebookPage.testingPerformed}</p>
+          </section>
+          <section>
+            <h4>Results / Data</h4>
+            <p>{notebookPage.testData || notebookPage.results}</p>
           </section>
           <section>
             <h4>Problems Encountered</h4>
@@ -210,6 +317,29 @@ export default function MissionResults({ mission, onSave, saved }: MissionResult
               ))}
             </ul>
           </section>
+        </div>
+
+        <div style={{ marginTop: 18 }}>
+          <h4 className="notebook-table-heading">Testing Table</h4>
+          <div className="notebook-table">
+            <div className="notebook-table-row testing-table-row notebook-table-head">
+              <span>Trial</span>
+              <span>Before/After</span>
+              <span>Result</span>
+              <span>Notes</span>
+            </div>
+            {(testingTable.length
+              ? testingTable
+              : [{ trial: 1, phase: "Retest", result: "Not documented", notes: "Add trial-by-trial test data before final export." }]
+            ).map((trial) => (
+              <div className="notebook-table-row testing-table-row" key={`${trial.trial}-${trial.phase}-${trial.notes}`}>
+                <span>{trial.trial}</span>
+                <span>{trial.phase}</span>
+                <span>{trial.result}</span>
+                <span>{trial.notes}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div style={{ marginTop: 18 }}>

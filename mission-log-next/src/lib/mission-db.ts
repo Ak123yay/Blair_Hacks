@@ -61,6 +61,7 @@ export function rowToMission(row: Record<string, unknown>): MissionLog {
     id: asString(row.id),
     title: asString(row.title, "Untitled mission"),
     missionMode: (row.mission_mode || "standard") as MissionLog["missionMode"],
+    meetingType: row.meeting_type as MissionLog["meetingType"] | undefined,
     crew: asArray<string>(row.crew),
     date: asString(row.date),
     rawTranscript: asString(row.raw_transcript),

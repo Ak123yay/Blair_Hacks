@@ -1,22 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateMissionLog } from "@/lib/glm";
+import { validateMissionInput } from "@/lib/mission-quality";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { transcript, crew, missionMode, mode, title, customCategory, teamName, projectName } = body;
+    const { transcript, crew, missionMode, mode, title, customCategory, teamName, projectName, date, meetingType } = body;
     const selectedMode = missionMode || mode || "standard";
 
-    if (!transcript || !transcript.trim()) {
+    const validation = validateMissionInput({ transcript, crew, missionMode: selectedMode, title, customCategory, teamName, projectName, date, meetingType });
+    if (!validation.valid) {
       return NextResponse.json(
-        { error: "Transcript is required" },
-        { status: 400 }
-      );
-    }
-
-    if (!title || !title.trim()) {
-      return NextResponse.json(
-        { error: "Mission title is required" },
+        { error: validation.errors.join(" ") },
         { status: 400 }
       );
     }
@@ -27,7 +22,7 @@ export async function POST(request: NextRequest) {
       selectedMode,
       title,
       customCategory,
-      { teamName, projectName }
+      { teamName, projectName, date, meetingType }
     );
 
     return NextResponse.json(mission);

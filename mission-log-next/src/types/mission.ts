@@ -28,14 +28,24 @@ export interface NotebookPage {
   missionTitle: string;
   teamMembers: string[];
   goal: string;
+  startingProblem?: string;
+  rootCause?: string;
+  changeMade?: string;
+  reasoning?: string;
   workCompleted: string;
   problemsEncountered: string[];
   designDecisions: {
     decision: string;
     reason: string;
+    alternativesConsidered?: string;
+    expectedBenefit?: string;
     evidenceNeeded: string;
   }[];
   testingPerformed: string;
+  testProcedure?: string;
+  testData?: string;
+  evidenceAttached?: string[];
+  reflection?: string;
   results: string;
   nextSteps: string[];
   evidenceNeeded: string[];
@@ -65,11 +75,40 @@ export interface DesignMemoryEntry {
   citations: string[];
 }
 
+export interface EvidenceClaimMatch {
+  claim: string;
+  evidence: string;
+  status: "Strong" | "Weak" | "Missing";
+  source: string;
+}
+
+export interface FollowUpQuestion {
+  question: string;
+  reason: string;
+}
+
+export interface DecisionGraphNode {
+  id: string;
+  label: string;
+  detail: string;
+  kind: "Problem" | "Decision" | "Evidence" | "Result" | "Next";
+}
+
+export interface TestTrial {
+  trial: number;
+  phase: "Before fix" | "After fix" | "Baseline" | "Retest";
+  result: "Success" | "Fail" | "Partial" | "Not documented";
+  notes: string;
+}
+
+export type MeetingType = "software" | "mechanical" | "testing" | "strategy" | "competition";
+
 export interface MissionLog {
   id: string;
   title: string;
   teamName?: string;
   missionMode: MissionMode;
+  meetingType?: MeetingType;
   crew: string[];
   date: string;
   rawTranscript: string;
@@ -95,7 +134,9 @@ export interface MissionFormData {
   title: string;
   teamName?: string;
   missionMode: MissionMode;
+  meetingType: MeetingType;
   crew: string;
+  date: string;
   transcript: string;
   projectName: string;
   customCategory?: string; // For custom mode

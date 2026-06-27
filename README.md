@@ -18,9 +18,9 @@
 
 MissionLog is an AI engineering notebook for robotics, hackathon, and technical teams.
 
-The idea is simple: a team should be able to paste messy meeting notes or upload audio, then get a clean mission log with notebook entries, tasks, decisions, evidence gaps, judge prep, and searchable design memory.
+The idea is simple: a team should be able to paste messy meeting notes or upload audio, then get a draft mission log that identifies gaps, asks follow-up questions, and only becomes a final notebook page when the engineering details are strong enough.
 
-MissionLog is built around student engineering workflows, especially VEX-style documentation where teams need to prove what changed, why it changed, what testing happened, and what evidence supports the decision.
+MissionLog is built around student engineering workflows, especially VEX-style documentation where teams need to prove what changed, why it changed, what testing happened, and what evidence supports each claim.
 
 ## Why I built this
 
@@ -44,11 +44,18 @@ Working areas include:
 - AI mission generation with GLM 5.1
 - robotics, hackathon, startup, research, freelance, enterprise, and custom modes
 - audio transcription flow
+- required mission metadata validation
 - mission saving with Supabase
 - local fallback storage
-- engineering notebook pages
+- draft logs and final notebook pages
+- notebook quality scoring
+- final PDF export quality gate
 - task and decision extraction
 - evidence gap detection
+- evidence-to-claim matching
+- AI follow-up questions
+- testing table generation
+- design decision graph
 - judge-readiness scoring
 - PDF export through browser print
 - AI-powered Design Memory answers
@@ -60,22 +67,29 @@ A user can:
 
 1. Sign in.
 2. Create a new mission.
-3. Paste meeting notes, upload audio, or load the sample robotics demo.
-4. Choose a mission mode.
-5. Generate a structured mission log with AI.
-6. Save it to the flight log.
-7. Export a notebook page as PDF.
-8. Ask Design Memory questions later.
+3. Enter real metadata: date, project, mission title, team members, and meeting type.
+4. Paste meeting notes, upload audio, or load the sample robotics demo.
+5. Choose a mission mode.
+6. Generate a structured draft log with AI.
+7. Review follow-up questions, quality gaps, test data, and evidence-to-claim matches.
+8. Save it to the flight log.
+9. Export a final notebook page only after the quality gate passes.
+10. Ask Design Memory questions later.
 
 Generated mission logs include:
 
 - mission summary
 - full engineering notebook entry
+- notebook quality score
 - command decisions
 - task assignments
 - system anomalies
 - next mission goals
 - proof checklist
+- evidence-to-claim matches
+- AI follow-up questions
+- testing table
+- design decision graph
 - judge-ready recap
 - missing documentation warnings
 - notebook page artifact
@@ -88,10 +102,13 @@ At a high level:
 
 ```text
 Meeting notes / transcript
+  -> required metadata validation
   -> mission mode prompt
   -> GLM 5.1 generation
   -> structured mission JSON
-  -> notebook page, tasks, evidence, judge prep
+  -> draft notebook page, tasks, evidence, judge prep
+  -> quality gate and follow-up questions
+  -> final notebook export when ready
   -> saved mission history
   -> Design Memory question answering
 ```
@@ -117,6 +134,7 @@ MissionLog uses AI for:
 - extracting task assignments
 - identifying command decisions
 - detecting missing evidence
+- asking follow-up questions when notes are vague
 - creating judge-ready summaries
 - generating likely judge prep material
 - answering questions from saved design memory
@@ -128,9 +146,58 @@ Regular application code handles:
 - mission ownership
 - Supabase persistence
 - local fallback storage
+- metadata validation
+- notebook quality scoring
+- draft/final export gating
+- evidence strength rules
 - export/download behavior
 - routing and permissions
 - UI state and validation
+
+## Notebook quality gate
+
+MissionLog separates weak drafts from final notebook pages.
+
+New mission generation requires:
+
+- date
+- project name
+- mission title
+- real team member names
+- meeting type: software, mechanical, testing, strategy, or competition
+
+Placeholder metadata is blocked before generation. Examples include:
+
+```text
+Invalid Date
+unknown
+test
+asdf
+dsa
+N/A
+```
+
+Every notebook is scored against engineering documentation criteria:
+
+| Category | Points |
+| --- | ---: |
+| Real date/team/project | 10 |
+| Specific problem | 15 |
+| Root cause or diagnosis | 15 |
+| Specific fix or design change | 15 |
+| Test procedure | 15 |
+| Test data | 15 |
+| Actual evidence attached or linked | 15 |
+
+If the score is below 70%, the log stays in Draft Log mode and final PDF export is blocked. The UI shows the missing information and follow-up questions needed to make the page stronger.
+
+Evidence strength is calculated by application logic:
+
+- Strong: actual uploaded or linked file, image, video, commit, log, or test table exists
+- Weak: evidence is mentioned but not attached
+- Missing: no proof exists
+
+The AI is instructed not to invent details. Missing fields should be marked as `Not documented`.
 
 ## Tech stack
 
@@ -215,16 +282,31 @@ For judging or demos:
 1. Go to `New Mission`.
 2. Click `Load Sample Robotics Mission`.
 3. Click `Generate Mission Log`.
-4. Review the notebook page, decisions, tasks, evidence gaps, and judge brief.
-5. Save the mission.
-6. Go to `Ask Memory`.
-7. Ask something like:
+4. Review the Draft Log / Final Notebook Page status.
+5. Review notebook quality, follow-up questions, evidence-to-claim matches, testing table, decision graph, tasks, and judge brief.
+6. Confirm final PDF export is blocked when quality is below 70%.
+7. Add stronger evidence or test data in the notes, regenerate, and verify the quality score improves.
+8. Save the mission.
+9. Go to `Ask Memory`.
+10. Ask something like:
 
 ```text
 Why did we stop using H-drive?
 ```
 
 MissionLog retrieves the saved design memory and uses GLM 5.1 to answer with citations.
+
+For metadata validation demos:
+
+1. Try to create a mission with a team member like `dsa` or project name like `test`.
+2. Confirm generation is blocked with a validation message.
+
+For final export demos:
+
+1. Generate a weak mission with vague notes and no evidence.
+2. Confirm `Export Final PDF` is blocked.
+3. Use the quality gaps and AI follow-up questions to strengthen the notes.
+4. Regenerate and export once the notebook quality score reaches 70% or higher.
 
 ## Failure handling
 
@@ -234,6 +316,8 @@ Examples:
 
 - If Supabase save fails, the UI shows the real save error.
 - If GLM 5.1 returns truncated JSON, the app attempts JSON repair before failing.
+- If mission metadata is fake or incomplete, generation is blocked before the AI call.
+- If notebook quality is too low, final PDF export is blocked and missing fields are shown.
 - If NVIDIA NIM workers are busy, Design Memory retries temporary failures.
 - If a user is not signed in, protected workspace routes redirect to login.
 - If no related memory is found, Design Memory says it cannot answer from saved missions yet.
@@ -254,9 +338,13 @@ Manual checks:
 - create a mission
 - use `Load Sample Robotics Mission`
 - generate a mission log
+- verify fake metadata is blocked
+- verify weak logs stay in Draft Log mode
+- verify final PDF export is blocked below 70% quality
+- verify evidence-to-claim statuses do not show Strong without attached or linked proof
 - save the mission
 - open the mission from the dashboard
-- export PDF
+- export final PDF when quality is high enough
 - ask a Design Memory question
 - open Settings
 

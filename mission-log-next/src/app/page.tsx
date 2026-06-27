@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   Clock3,
   Code2,
+  FileCheck2,
   FileText,
   Mic,
   Rocket,
@@ -23,43 +24,43 @@ export const metadata: Metadata = {
 };
 
 const proofItems = [
-  ["Built for", "Robotics and hackathon teams", Rocket],
-  ["Input", "Meeting notes, transcripts, or audio", Mic],
-  ["Output", "Logs, tasks, decisions, and proof", ClipboardCheck],
-  ["Storage", "Team-ready mission history", ShieldCheck],
+  ["Drafts", "Rough notes become structured logs", FileText],
+  ["Quality gate", "Final export blocked until ready", ShieldCheck],
+  ["Evidence", "Claims checked against proof", ClipboardCheck],
+  ["Memory", "Decisions stay searchable", Rocket],
 ];
 
 const workflow = [
   {
     eyebrow: "Step 01",
-    title: "Drop in the meeting",
-    body: "Paste rough notes or upload a recording. MissionLog keeps the workflow direct so teams can document right after a build session.",
+    title: "Paste the messy notes",
+    body: "Drop in rough meeting notes, transcript text, or audio from the build session while the details are still fresh.",
     icon: Mic,
-    note: "Notes or audio",
+    note: "2 minutes",
   },
   {
     eyebrow: "Step 02",
-    title: "Generate the log",
-    body: "The app extracts decisions, owners, anomalies, next goals, and a polished engineering notebook entry from the raw discussion.",
+    title: "Find the missing proof",
+    body: "MissionLog drafts the page, scores notebook quality, checks claims against evidence, and asks the follow-up questions a judge would ask.",
     icon: Sparkles,
-    note: "About 30 seconds",
+    note: "Quality gate",
   },
   {
     eyebrow: "Step 03",
-    title: "Review and ship",
-    body: "Save the mission, browse the timeline, and keep a clean record for judging, demos, standups, and team accountability.",
-    icon: FileText,
-    note: "Ready to share",
+    title: "Export only when ready",
+    body: "Weak notes stay in Draft Log mode. Final notebook export unlocks when the page has real metadata, testing, data, and evidence.",
+    icon: FileCheck2,
+    note: "70%+ quality",
   },
 ];
 
 const features = [
-  ["Mode-aware prompts", "VEX, hackathon, startup, research, freelance, enterprise, and custom team contexts.", Code2],
-  ["Decision tracking", "Capture what the team chose, who made the call, and why it matters.", ClipboardCheck],
-  ["Task extraction", "Turn scattered action items into assigned objectives with priority and due dates.", Users],
-  ["Timeline view", "See project progress across saved missions without digging through old notes.", Clock3],
-  ["Analytics", "Understand mission volume, task load, and documentation trends over time.", BarChart3],
-  ["Judge-ready recap", "Summarize the proof points that make a robotics notebook easier to evaluate.", ShieldCheck],
+  ["Quality-gated export", "Draft logs cannot become final PDFs until required engineering details are present.", ShieldCheck],
+  ["Evidence-to-claim checks", "Claims are marked Strong, Weak, or Missing based on attached proof, not AI confidence.", ClipboardCheck],
+  ["Testing tables", "Trial counts and pass/fail results turn vague progress into defensible engineering data.", BarChart3],
+  ["Decision graph", "Trace the chain from problem to diagnosis, fix, test, result, evidence, and next iteration.", Code2],
+  ["Follow-up questions", "The app asks for exact errors, subsystems, test counts, data, and evidence when notes are vague.", Users],
+  ["Design memory", "Saved decisions become searchable answers with source citations later.", Clock3],
 ];
 
 const plans = [
@@ -122,48 +123,116 @@ function BrowserPreview() {
         <span />
         <div>missionlog.app/new</div>
       </div>
-      <div className="landing-browser-body">
-        <div>
-          <p className="mono">Live generation</p>
-          <h3 className="serif">Build Session #12</h3>
+      <div className="landing-browser-body landing-browser-body-upgraded">
+        <div className="landing-preview-main">
+          <div className="landing-preview-kicker">
+            <span />
+            Draft Log
+          </div>
+          <h3 className="serif">Autonomous Turning Fix</h3>
           <p>
-            Autonomous tuning improved turn accuracy from 5 degrees off to 2 degrees.
-            Arm prototype needs a ratchet redesign before the next field test.
+            The robot drifted left during turns. MissionLog found the missing
+            test data, evidence, and root-cause details before final export.
           </p>
-          <div className="landing-mini-grid">
-            {["3 tasks", "2 decisions", "1 anomaly", "Judge recap"].map((item) => (
-              <span key={item}>{item}</span>
-            ))}
+          <div className="landing-quality-card">
+            <div>
+              <p className="mono">Notebook quality</p>
+              <strong className="serif">68%</strong>
+            </div>
+            <span>Final PDF blocked</span>
+          </div>
+          <div className="landing-claim-table">
+            <div><span>Claim</span><span>Status</span></div>
+            <div><span>Turn speed reduced</span><b>Weak</b></div>
+            <div><span>Robot improved to 4/5</span><b>Missing</b></div>
+            <div><span>Testing video attached</span><b>Missing</b></div>
           </div>
         </div>
         <div className="landing-agent-card">
           <div className="landing-agent-row done">
             <span />
             <div>
-              <strong>Transcript parsed</strong>
-              <small>Speaker notes normalized</small>
+              <strong>Metadata checked</strong>
+              <small>Date, team, project, type</small>
             </div>
           </div>
           <div className="landing-agent-row done">
             <span />
             <div>
-              <strong>Tasks extracted</strong>
-              <small>Owners and due dates found</small>
+              <strong>Claims matched</strong>
+              <small>Evidence strength calculated</small>
             </div>
           </div>
           <div className="landing-agent-row active">
             <span />
             <div>
-              <strong>Notebook drafted</strong>
-              <small>Engineering entry in progress</small>
+              <strong>Questions generated</strong>
+              <small>Ask for test data and proof</small>
             </div>
           </div>
-          <div className="agent-progress-bar">
-            <div className="agent-progress-bar-fill" style={{ width: "68%" }} />
+          <div className="landing-followup-card">
+            <p className="mono">Follow-up</p>
+            <strong>How many trials did you run after the fix?</strong>
+            <small>Needed for final notebook export.</small>
+          </div>
+          <div className="landing-test-grid">
+            {["Fail", "Success", "Success", "Success"].map((item, index) => (
+              <div key={`${item}-${index}`}>
+                <span>Trial {index + 1}</span>
+                <b>{item}</b>
+              </div>
+            ))}
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function TransformationPreview() {
+  return (
+    <section className="landing-transform">
+      <div className="container">
+        <div className="landing-transform-heading">
+          <p className="eyebrow">The upgrade</p>
+          <h2 className="serif">
+            MissionLog does not make weak notes look finished.
+            <span className="serif-italic"> It makes them stronger.</span>
+          </h2>
+        </div>
+        <div className="landing-transform-grid">
+          <div className="landing-transform-card">
+            <div className="mono">Raw meeting notes</div>
+            <p>
+              fixed code errors today. robot was weird. aarush changed auton and
+              it worked better. need video later.
+            </p>
+            <ul>
+              <li>Invalid date risk</li>
+              <li>No root cause</li>
+              <li>No test data</li>
+              <li>No evidence attached</li>
+            </ul>
+          </div>
+          <div className="landing-transform-arrow">
+            <span className="hand">quality gate</span>
+            <i />
+            <b className="mono">missionlog</b>
+          </div>
+          <div className="landing-transform-card final">
+            <div className="mono">Engineering notebook page</div>
+            <h3 className="serif">Starting Problem</h3>
+            <p>The robot drifted left during autonomous turns and missed the scoring zone.</p>
+            <h3 className="serif">Test Data</h3>
+            <p>After reducing turn speed, the robot completed 4 out of 5 trials.</p>
+            <div className="landing-transform-status">
+              <span>Evidence needed</span>
+              <strong>Video or code diff</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -173,33 +242,37 @@ export default function HomePage() {
       <Navbar />
       <main className="landing-page">
         <section className="landing-hero">
-          <div className="landing-hero-copy">
-            <p className="eyebrow">AI documentation for build teams</p>
-            <h1 className="serif">
-              Turn messy meetings into <span className="serif-italic">usable engineering logs</span>.
+          <div className="landing-hero-copy landing-hero-copy-centered">
+            <div className="landing-live-pill mono">
+              <span />
+              Quality-gated notebooks for build teams
+            </div>
+            <h1 className="landing-hero-title">
+              <span>Meeting notes aren&apos;t enough.</span>
+              <span><em>We build your notebook</em></span>
+              <span>into engineering proof.</span>
             </h1>
             <p>
-              MissionLog is an AI mission-control platform for student engineering teams.
-              It turns messy meetings, build notes, photos, and code progress into
-              structured engineering notebook entries, task lists, design-decision
-              records, evidence checklists, project timelines, and judge-ready recaps.
+              MissionLog turns meetings, test notes, decisions, and evidence gaps
+              into a judge-ready engineering notebook workflow.
             </p>
-            <div className="landing-actions">
-              <Link href="/signup" className="btn btn-accent btn-lg">
-                Start free
-                <ArrowRight size={16} aria-hidden="true" />
-              </Link>
-              <Link href="/login" className="btn btn-soft btn-lg">
-                Sign in
+            <div className="landing-search-cta">
+              <Mic size={18} aria-hidden="true" />
+              <span>Paste meeting notes...</span>
+              <Link href="/signup" className="btn btn-accent">
+                Generate Draft Free
+                <ArrowRight size={15} aria-hidden="true" />
               </Link>
             </div>
             <div className="landing-trust-row mono">
               <span><Check size={13} /> No credit card</span>
-              <span><Check size={13} /> Audio or notes</span>
-              <span><Check size={13} /> Built for teams</span>
+              <span><Check size={13} /> Draft-first workflow</span>
+              <span><Check size={13} /> Final export gate</span>
             </div>
           </div>
-          <BrowserPreview />
+          <div className="landing-hero-preview">
+            <BrowserPreview />
+          </div>
         </section>
 
         <section className="landing-proof-strip">
@@ -219,11 +292,13 @@ export default function HomePage() {
           })}
         </section>
 
+        <TransformationPreview />
+
         <section className="landing-section">
           <SectionHeading
             eyebrow="How it works"
-            title="Three steps. No documentation backlog."
-            body="The Onara reference is simple and operational. MissionLog should feel the same: one clear path from raw material to a polished artifact."
+            title="Three steps. No documentation theater."
+            body="MissionLog keeps the path direct: capture the session, expose the gaps, then export only when the engineering record is defensible."
           />
           <div className="landing-card-grid three">
             {workflow.map((step) => {

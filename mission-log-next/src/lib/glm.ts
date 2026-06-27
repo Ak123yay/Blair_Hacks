@@ -3,6 +3,7 @@ import {
   DesignMemoryEntry,
   EvidenceItem,
   JudgeBrief,
+  MeetingType,
   MissionLog,
   MissionMode,
   NotebookPage,
@@ -234,10 +235,18 @@ In addition to the legacy fields, generate product-level MissionLog artifacts:
     "missionTitle": "title",
     "teamMembers": ["names present"],
     "goal": "what the team tried to accomplish",
+    "startingProblem": "what was not working before the meeting, or Not documented",
+    "rootCause": "why it happened, or Not documented",
+    "changeMade": "exact design/code/mechanical change made, or Not documented",
+    "reasoning": "why this fix was chosen, or Not documented",
     "workCompleted": "what actually got done",
     "problemsEncountered": ["failures, blockers, unknowns"],
-    "designDecisions": [{"decision": "choice made", "reason": "why", "evidenceNeeded": "proof required"}],
+    "designDecisions": [{"decision": "choice made", "reason": "why", "alternativesConsidered": "alternatives rejected or Not documented", "expectedBenefit": "expected benefit", "evidenceNeeded": "proof required"}],
     "testingPerformed": "tests/trials/data collected, or say not documented",
+    "testProcedure": "how the team verified the change, or Not documented",
+    "testData": "actual trial counts, measurements, pass/fail results, or Not documented",
+    "evidenceAttached": ["actual attached or linked files only; empty if none"],
+    "reflection": "what the team learned and what comes next, or Not documented",
     "results": "what changed after testing",
     "nextSteps": ["specific next actions"],
     "evidenceNeeded": ["video, photo, code screenshot, data table, CAD, score, etc."]
@@ -257,14 +266,31 @@ In addition to the legacy fields, generate product-level MissionLog artifacts:
 
 The notebookPage must read like a full engineering notebook page, not a short meeting summary.
 The judgeBrief must be competition-ready and include likely judge questions.
-The evidenceVault should tag missing proof even if no files were uploaded.`;
+The evidenceVault should tag missing proof even if no files were uploaded.
+Make every important claim traceable to evidence: test data, photos, code screenshots, videos, CAD, commits, or notes.
+When a claim lacks proof, describe the missing evidence clearly so the UI can ask follow-up questions.
+Preserve design reasoning as a chain: problem -> diagnosis -> decision -> fix -> test -> result -> evidence -> next iteration.
+Do not invent details. If a detail is missing, write "Not documented" and add a follow-up question target through missingDocumentationWarnings or evidenceNeeded.
+Do not mark evidence as UPLOADED unless the transcript includes an actual file name, URL, commit hash, screenshot, video, data table, or attached artifact reference.
+Never write internal processing details such as "transcript truncated" in notebook content. Use clean user-facing wording such as "The transcript did not include final test results or a final design decision."`;
 
-function getUserPrompt(transcript: string, crew: string, mode: MissionMode, customCategory?: string): string {
+function getUserPrompt(
+  transcript: string,
+  crew: string,
+  mode: MissionMode,
+  customCategory?: string,
+  context?: { projectName?: string; teamName?: string; date?: string; meetingType?: MeetingType }
+): string {
   const crewList = crew.trim() ? `Crew members present: ${crew}` : "Crew members: extract from transcript context clues or mark as 'Unknown'";
+  const metadata = `Mission metadata:
+- Date: ${context?.date || "Not documented"}
+- Project: ${context?.projectName || "Not documented"}
+- Meeting type: ${context?.meetingType || "Not documented"}`;
 
   if (mode === "custom" && customCategory) {
     return `This is a ${customCategory} team meeting. Focus on properly documenting the work discussed using ${customCategory} terminology and standards.
 
+${metadata}
 ${crewList}
 
 MEETING TRANSCRIPT:
@@ -288,6 +314,7 @@ Analyze this transcript and generate the structured documentation. Be thorough a
   if (mode === "custom") {
     return `This is a custom team meeting. Focus on properly documenting the work discussed.
 
+${metadata}
 ${crewList}
 
 MEETING TRANSCRIPT:
@@ -300,6 +327,7 @@ Analyze this transcript and generate the structured documentation. Be thorough a
 
   return `${modeContext[mode]}
 
+${metadata}
 ${crewList}
 
 MEETING TRANSCRIPT:
@@ -316,7 +344,7 @@ export async function generateMissionLog(
   mode: MissionMode,
   title: string,
   customCategory?: string,
-  context?: { projectName?: string; teamName?: string }
+  context?: { projectName?: string; teamName?: string; date?: string; meetingType?: MeetingType }
 ): Promise<MissionLog> {
   const apiKey = process.env.NVIDIA_NIM_API_KEY;
 
@@ -334,7 +362,7 @@ export async function generateMissionLog(
       model: "z-ai/glm-5.1",
       messages: [
         { role: "system", content: getSystemPrompt(mode, customCategory) },
-        { role: "user", content: getUserPrompt(transcript, crew, mode, customCategory) },
+        { role: "user", content: getUserPrompt(transcript, crew, mode, customCategory, context) },
       ],
       temperature: 0.4,
       max_tokens: 8192,
@@ -370,8 +398,9 @@ export async function generateMissionLog(
     title,
     teamName: context?.teamName || "",
     missionMode: mode,
+    meetingType: context?.meetingType,
     crew: crew.split(",").map((c) => c.trim()).filter(Boolean),
-    date: new Date().toISOString(),
+    date: context?.date ? new Date(context.date).toISOString() : new Date().toISOString(),
     rawTranscript: transcript,
     summary: (parsed.summary as string) || "",
     notebookPage: parsed.notebookPage as NotebookPage | undefined,

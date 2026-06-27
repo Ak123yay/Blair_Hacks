@@ -5,6 +5,7 @@ import { MissionFormData, MissionMode } from "@/types/mission";
 import { Ic } from "@/components/icons/Ic";
 import { StyleSection } from "./Shared";
 import AudioUploader from "./AudioUploader";
+import { validateMissionInput } from "@/lib/mission-quality";
 
 interface MissionFormProps {
   onSubmit: (data: MissionFormData) => void;
@@ -28,7 +29,9 @@ const sampleRoboticsMission: MissionFormData = {
   title: "Drive Base Testing and Intake Reliability",
   teamName: "VEX Robotics 1234A",
   missionMode: "vex",
+  meetingType: "testing",
   crew: "Aarush, Maya, Jordan, Sam",
+  date: new Date().toISOString().slice(0, 10),
   projectName: "VEX High Stakes Robot",
   customCategory: "",
   transcript: `Today the team tested the new drivetrain and intake changes on the practice field.
@@ -45,11 +48,14 @@ Tasks for next meeting: Sam will finish autonomous tuning, Maya will collect vid
 };
 
 export default function MissionForm({ onSubmit, loading, initialTranscript = "", onTranscriptChange }: MissionFormProps) {
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [formData, setFormData] = useState<MissionFormData>({
     title: "",
     teamName: "VEX Robotics 1234A",
     missionMode: "standard",
+    meetingType: "software",
     crew: "",
+    date: new Date().toISOString().slice(0, 10),
     transcript: initialTranscript,
     projectName: "",
     customCategory: "",
@@ -67,6 +73,12 @@ export default function MissionForm({ onSubmit, loading, initialTranscript = "",
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const validation = validateMissionInput(formData);
+    if (!validation.valid) {
+      setValidationErrors(validation.errors);
+      return;
+    }
+    setValidationErrors([]);
     onSubmit(formData);
   };
 
@@ -180,6 +192,19 @@ export default function MissionForm({ onSubmit, loading, initialTranscript = "",
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 28 }}>
         <div>
           <label className="mono" style={{ display: "block", marginBottom: 6 }}>
+            Date
+          </label>
+          <input
+            type="date"
+            required
+            value={formData.date}
+            onChange={(e) => setFormData((f) => ({ ...f, date: e.target.value }))}
+            className="input"
+          />
+        </div>
+
+        <div>
+          <label className="mono" style={{ display: "block", marginBottom: 6 }}>
             Team
           </label>
           <input
@@ -191,7 +216,7 @@ export default function MissionForm({ onSubmit, loading, initialTranscript = "",
           />
         </div>
 
-        <div>
+        <div style={{ gridColumn: "1 / -1" }}>
           <label className="mono" style={{ display: "block", marginBottom: 6 }}>
             Mission Title
           </label>
@@ -216,6 +241,25 @@ export default function MissionForm({ onSubmit, loading, initialTranscript = "",
             placeholder="e.g., VEX Over Under"
             className="input"
           />
+        </div>
+      </div>
+
+      <div style={{ marginTop: 18 }}>
+        <label className="mono" style={{ display: "block", marginBottom: 8 }}>
+          Meeting Type
+        </label>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 8 }}>
+          {(["software", "mechanical", "testing", "strategy", "competition"] as const).map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setFormData((f) => ({ ...f, meetingType: type }))}
+              className={formData.meetingType === type ? "chip chip-active chip-mono" : "chip chip-mono"}
+              style={{ justifyContent: "center", textTransform: "capitalize" }}
+            >
+              {type}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -286,6 +330,25 @@ Example:
       </div>
 
       {/* SUBMIT */}
+      {validationErrors.length > 0 && (
+        <div
+          className="card"
+          style={{
+            marginTop: 22,
+            padding: 16,
+            borderColor: "oklch(0.85 0.08 25)",
+            background: "oklch(0.97 0.02 25)",
+          }}
+        >
+          <div className="mono" style={{ marginBottom: 8, color: "oklch(0.55 0.10 50)" }}>
+            Fix metadata before generation
+          </div>
+          <ul style={{ margin: 0, paddingLeft: 18, color: "var(--ink-3)", fontSize: 13.5, lineHeight: 1.6 }}>
+            {validationErrors.map((error) => <li key={error}>{error}</li>)}
+          </ul>
+        </div>
+      )}
+
       <div style={{ display: "flex", gap: 12, marginTop: 28, justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ fontSize: 13, color: "var(--ink-3)" }}>
           <Ic name="sparkle" size={13} className="inline" color="var(--accent-ink)" />
