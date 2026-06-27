@@ -260,4 +260,4 @@ Manual checks:
 
 ## License
 
-Private project unless a license file says otherwise.
+MIT Licence
