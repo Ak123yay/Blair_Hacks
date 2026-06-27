@@ -14,6 +14,8 @@
 
 </div>
 
+<img width="2558" height="1263" alt="image" src="https://github.com/user-attachments/assets/da87cfdc-1ccb-4aa5-9146-82cddb0a31c3" />
+
 MissionLog is an AI engineering notebook for robotics, hackathon, and technical teams.
 
 The idea is simple: a team should be able to paste messy meeting notes or upload audio, then get a clean mission log with notebook entries, tasks, decisions, evidence gaps, judge prep, and searchable design memory.
