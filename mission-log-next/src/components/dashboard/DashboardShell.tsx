@@ -15,6 +15,9 @@ import {
   Settings,
   History,
   Star,
+  Archive,
+  Brain,
+  Trophy,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -39,6 +42,9 @@ type DashboardShellProps = {
 const primaryNav = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/timeline", label: "Timeline", icon: Clock },
+  { href: "/evidence", label: "Evidence Vault", icon: Archive },
+  { href: "/memory", label: "Design Memory", icon: Brain },
+  { href: "/judge", label: "Judge Mode", icon: Trophy },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/new", label: "New Mission", icon: Plus, accent: true },
 ];

@@ -22,14 +22,62 @@ export interface SystemAnomaly {
   suggestedFix: string;
 }
 
+export interface NotebookPage {
+  date: string;
+  project: string;
+  missionTitle: string;
+  teamMembers: string[];
+  goal: string;
+  workCompleted: string;
+  problemsEncountered: string[];
+  designDecisions: {
+    decision: string;
+    reason: string;
+    evidenceNeeded: string;
+  }[];
+  testingPerformed: string;
+  results: string;
+  nextSteps: string[];
+  evidenceNeeded: string[];
+}
+
+export interface JudgeBrief {
+  engineeringChallenge: string;
+  designIterations: string[];
+  testingEvidence: string[];
+  softwareContributions: string[];
+  mechanicalContributions: string[];
+  teamwork: string;
+  likelyQuestions: string[];
+}
+
+export interface EvidenceItem {
+  type: string;
+  description: string;
+  relatedTo: string;
+  usefulFor: string;
+  status: "NEEDED" | "MENTIONED" | "UPLOADED";
+}
+
+export interface DesignMemoryEntry {
+  question: string;
+  answer: string;
+  citations: string[];
+}
+
 export interface MissionLog {
   id: string;
   title: string;
+  teamName?: string;
   missionMode: MissionMode;
   crew: string[];
   date: string;
   rawTranscript: string;
   summary: string;
+  notebookPage?: NotebookPage;
+  judgeBrief?: JudgeBrief;
+  evidenceVault?: EvidenceItem[];
+  designMemory?: DesignMemoryEntry[];
   engineeringNotebookEntry: string;
   commandDecisions: CommandDecision[];
   taskAssignments: TaskAssignment[];
@@ -45,6 +93,7 @@ export interface MissionLog {
 
 export interface MissionFormData {
   title: string;
+  teamName?: string;
   missionMode: MissionMode;
   crew: string;
   transcript: string;

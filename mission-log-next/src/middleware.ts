@@ -42,6 +42,9 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/team") ||
     request.nextUrl.pathname.startsWith("/notifications") ||
     request.nextUrl.pathname.startsWith("/settings") ||
+    request.nextUrl.pathname.startsWith("/evidence") ||
+    request.nextUrl.pathname.startsWith("/memory") ||
+    request.nextUrl.pathname.startsWith("/judge") ||
     request.nextUrl.pathname.startsWith("/help") ||
     request.nextUrl.pathname.startsWith("/changelog") ||
     request.nextUrl.pathname.startsWith("/upgrade") ||

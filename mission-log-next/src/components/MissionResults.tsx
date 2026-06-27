@@ -1,7 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { MissionLog } from "@/types/mission";
 import { Ic } from "@/components/icons/Ic";
+import {
+  getDesignMemory,
+  getEvidenceVault,
+  getJudgeBrief,
+  getJudgeReadinessScore,
+  getNotebookHtml,
+  getNotebookPage,
+} from "@/lib/mission-derived";
 
 interface MissionResultsProps {
   mission: MissionLog;
@@ -36,6 +45,44 @@ const severityColors: Record<string, string> = {
 };
 
 export default function MissionResults({ mission, onSave, saved }: MissionResultsProps) {
+  const [exportMessage, setExportMessage] = useState<string | null>(null);
+  const notebookPage = getNotebookPage(mission);
+  const judgeBrief = getJudgeBrief(mission);
+  const evidenceVault = getEvidenceVault(mission);
+  const designMemory = getDesignMemory(mission);
+  const judgeReadiness = getJudgeReadinessScore(mission);
+
+  const downloadNotebookHtml = () => {
+    const blob = new Blob([getNotebookHtml(mission)], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${mission.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-notebook.html`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportNotebookPdf = () => {
+    setExportMessage(null);
+
+    const notebookWindow = window.open("", "_blank");
+    if (!notebookWindow) {
+      downloadNotebookHtml();
+      setExportMessage("Popup blocked. Downloaded the notebook HTML instead; open it and print to PDF.");
+      return;
+    }
+
+    notebookWindow.document.open();
+    notebookWindow.document.write(getNotebookHtml(mission));
+    notebookWindow.document.close();
+    notebookWindow.focus();
+
+    setExportMessage("Print dialog opened. Choose Save as PDF.");
+    notebookWindow.setTimeout(() => {
+      notebookWindow.print();
+    }, 300);
+  };
+
   return (
     <div className="fadein-up" style={{ maxWidth: 900 }}>
       {/* HEADER */}
@@ -74,16 +121,199 @@ export default function MissionResults({ mission, onSave, saved }: MissionResult
             </div>
           </div>
         </div>
-        <button
-          onClick={onSave}
-          disabled={saved}
-          className={saved ? "btn btn-soft" : "btn btn-accent"}
-          style={{ minWidth: 160 }}
-        >
-          <Ic name={saved ? "check" : "download"} size={14} color={saved ? "var(--leaf)" : "white"} />
-          {saved ? "Saved to Flight Log" : "Save to Flight Log"}
-        </button>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <button
+            onClick={exportNotebookPdf}
+            className="btn btn-soft"
+            style={{ minWidth: 160 }}
+            type="button"
+          >
+            <Ic name="download" size={14} />
+            Export PDF
+          </button>
+          <button
+            onClick={onSave}
+            disabled={saved}
+            className={saved ? "btn btn-soft" : "btn btn-accent"}
+            style={{ minWidth: 160 }}
+            type="button"
+          >
+            <Ic name={saved ? "check" : "download"} size={14} color={saved ? "var(--leaf)" : "white"} />
+            {saved ? "Saved to Flight Log" : "Save to Flight Log"}
+          </button>
+          {exportMessage && (
+            <p className="mono" style={{ width: "100%", fontSize: 9, color: "var(--ink-3)", margin: 0 }}>
+              {exportMessage}
+            </p>
+          )}
+        </div>
       </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 10, marginBottom: 16 }}>
+        {[
+          { label: "Judge readiness", value: `${judgeReadiness}%`, icon: "star" },
+          { label: "Evidence items", value: evidenceVault.length, icon: "image" },
+          { label: "Decisions", value: mission.commandDecisions.length, icon: "target" },
+          { label: "Objectives", value: mission.taskAssignments.length, icon: "clipboard-check" },
+        ].map((stat) => (
+          <div key={stat.label} className="card-soft" style={{ padding: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Ic name={stat.icon} size={14} color="var(--accent-ink)" />
+              <span className="mono" style={{ fontSize: 9 }}>{stat.label}</span>
+            </div>
+            <div className="serif" style={{ fontSize: 26, fontWeight: 500, marginTop: 8 }}>{stat.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* FULL NOTEBOOK PAGE */}
+      <div className="card mission-notebook-page" style={{ padding: 28, marginBottom: 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 14, alignItems: "flex-start", marginBottom: 18 }}>
+          <div>
+            <div className="mono" style={{ marginBottom: 8 }}>Engineering Notebook Page</div>
+            <h3 className="serif" style={{ fontSize: 30, fontWeight: 500, margin: 0 }}>
+              {notebookPage.missionTitle}
+            </h3>
+            <p className="mono" style={{ marginTop: 8 }}>
+              {notebookPage.project} - {new Date(notebookPage.date).toLocaleDateString()}
+            </p>
+          </div>
+          <span className="badge badge-accent">Full page</span>
+        </div>
+
+        <div className="notebook-section-grid">
+          <section>
+            <h4>Team Members Present</h4>
+            <p>{notebookPage.teamMembers.join(", ")}</p>
+          </section>
+          <section>
+            <h4>Goal</h4>
+            <p>{notebookPage.goal}</p>
+          </section>
+          <section>
+            <h4>Work Completed</h4>
+            <p>{notebookPage.workCompleted}</p>
+          </section>
+          <section>
+            <h4>Testing Performed</h4>
+            <p>{notebookPage.testingPerformed}</p>
+          </section>
+          <section>
+            <h4>Results</h4>
+            <p>{notebookPage.results}</p>
+          </section>
+          <section>
+            <h4>Problems Encountered</h4>
+            <ul>
+              {(notebookPage.problemsEncountered.length ? notebookPage.problemsEncountered : ["No problems documented."]).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
+        </div>
+
+        <div style={{ marginTop: 18 }}>
+          <h4 className="notebook-table-heading">Design Decisions</h4>
+          <div className="notebook-table">
+            <div className="notebook-table-row notebook-table-head">
+              <span>Decision</span>
+              <span>Reason</span>
+              <span>Evidence Needed</span>
+            </div>
+            {(notebookPage.designDecisions.length
+              ? notebookPage.designDecisions
+              : [{ decision: "No design decision documented", reason: "Meeting notes need more detail.", evidenceNeeded: "Decision rationale" }]
+            ).map((decision) => (
+              <div className="notebook-table-row" key={`${decision.decision}-${decision.reason}`}>
+                <span>{decision.decision}</span>
+                <span>{decision.reason}</span>
+                <span>{decision.evidenceNeeded}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="notebook-section-grid" style={{ marginTop: 18 }}>
+          <section>
+            <h4>Next Steps</h4>
+            <ul>{notebookPage.nextSteps.map((item) => <li key={item}>{item}</li>)}</ul>
+          </section>
+          <section>
+            <h4>Evidence Needed</h4>
+            <ul>{notebookPage.evidenceNeeded.map((item) => <li key={item}>{item}</li>)}</ul>
+          </section>
+        </div>
+      </div>
+
+      {/* JUDGE MODE */}
+      <div className="card" style={{ padding: 24, marginBottom: 16, background: "var(--ink)", color: "var(--paper)", borderColor: "var(--ink)" }}>
+        <div className="mono" style={{ marginBottom: 12, color: "var(--accent-soft)" }}>Judge Mode Brief</div>
+        <h3 className="serif" style={{ fontSize: 28, fontWeight: 500, margin: "0 0 12px" }}>
+          {judgeBrief.engineeringChallenge}
+        </h3>
+        <div className="judge-brief-grid">
+          {[
+            ["Design Iterations", judgeBrief.designIterations],
+            ["Testing Evidence", judgeBrief.testingEvidence],
+            ["Software Contributions", judgeBrief.softwareContributions],
+            ["Mechanical Contributions", judgeBrief.mechanicalContributions],
+            ["Likely Judge Questions", judgeBrief.likelyQuestions],
+          ].map(([label, items]) => (
+            <section key={label as string}>
+              <h4>{label as string}</h4>
+              <ul>
+                {(items as string[]).map((item) => <li key={item}>{item}</li>)}
+              </ul>
+            </section>
+          ))}
+        </div>
+        <p style={{ margin: "16px 0 0", color: "rgb(255 255 255 / 0.72)", lineHeight: 1.6 }}>
+          <strong style={{ color: "var(--paper)" }}>Teamwork:</strong> {judgeBrief.teamwork}
+        </p>
+      </div>
+
+      {/* EVIDENCE VAULT */}
+      <div className="card" style={{ padding: 22, marginBottom: 16 }}>
+        <div className="mono" style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+          <Ic name="image" size={12} color="var(--accent-ink)" />
+          Evidence Vault
+        </div>
+        <div className="evidence-grid">
+          {evidenceVault.length ? evidenceVault.map((item) => (
+            <div key={`${item.type}-${item.description}`} className="card-soft evidence-item">
+              <span className="badge badge-warn">{item.status}</span>
+              <h4>{item.type}</h4>
+              <p>{item.description}</p>
+              <small>{item.relatedTo} - {item.usefulFor}</small>
+            </div>
+          )) : (
+            <p style={{ color: "var(--ink-3)", margin: 0 }}>No evidence gaps were detected.</p>
+          )}
+        </div>
+      </div>
+
+      {/* DESIGN MEMORY */}
+      {designMemory.length > 0 && (
+        <div className="card" style={{ padding: 22, marginBottom: 16 }}>
+          <div className="mono" style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+            <Ic name="database" size={12} color="var(--accent-ink)" />
+            Design Memory
+          </div>
+          <div style={{ display: "grid", gap: 10 }}>
+            {designMemory.map((memory) => (
+              <div key={memory.question} className="card-soft" style={{ padding: 16 }}>
+                <h4 style={{ margin: 0, fontSize: 14 }}>{memory.question}</h4>
+                <p style={{ margin: "8px 0 0", color: "var(--ink-3)", fontSize: 13.5, lineHeight: 1.55 }}>
+                  {memory.answer}
+                </p>
+                <p className="mono" style={{ marginTop: 8, fontSize: 9 }}>
+                  Cites: {memory.citations.join(", ")}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* SUMMARY */}
       {mission.summary && (

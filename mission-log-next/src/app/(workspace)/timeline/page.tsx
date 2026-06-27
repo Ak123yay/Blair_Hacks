@@ -1,23 +1,16 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useState, useEffect } from "react";
 import TimelineView from "@/components/TimelineView";
 import { MissionLog } from "@/types/mission";
-import { getMissionsLocal } from "@/lib/storage";
-
-function useLocalStorageMissions() {
-  const subscribe = (cb: () => void) => {
-    window.addEventListener("storage", cb);
-    return () => window.removeEventListener("storage", cb);
-  };
-  const getSnapshot = () => JSON.stringify(getMissionsLocal());
-  const getServerSnapshot = () => "[]";
-  const raw = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  return JSON.parse(raw) as MissionLog[];
-}
+import { getMissions } from "@/lib/storage";
 
 export default function TimelinePage() {
-  const missions = useLocalStorageMissions();
+  const [missions, setMissions] = useState<MissionLog[]>([]);
+
+  useEffect(() => {
+    getMissions().then(setMissions);
+  }, []);
 
   return (
     <div className="fadein-up">

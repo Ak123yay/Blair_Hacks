@@ -1,4 +1,14 @@
-import { MissionMode, TaskAssignment, CommandDecision, SystemAnomaly, MissionLog } from "@/types/mission";
+import {
+  CommandDecision,
+  DesignMemoryEntry,
+  EvidenceItem,
+  JudgeBrief,
+  MissionLog,
+  MissionMode,
+  NotebookPage,
+  SystemAnomaly,
+  TaskAssignment,
+} from "@/types/mission";
 import { v4 as uuidv4 } from "uuid";
 
 const NVIDIA_NIM_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
@@ -163,6 +173,41 @@ Analyze the meeting transcript and return JSON with this exact structure:
   return modePrompts[mode];
 }
 
+const productSystemSchema = `
+
+In addition to the legacy fields, generate product-level MissionLog artifacts:
+{
+  "notebookPage": {
+    "date": "ISO date or natural date from transcript",
+    "project": "project name if known",
+    "missionTitle": "title",
+    "teamMembers": ["names present"],
+    "goal": "what the team tried to accomplish",
+    "workCompleted": "what actually got done",
+    "problemsEncountered": ["failures, blockers, unknowns"],
+    "designDecisions": [{"decision": "choice made", "reason": "why", "evidenceNeeded": "proof required"}],
+    "testingPerformed": "tests/trials/data collected, or say not documented",
+    "results": "what changed after testing",
+    "nextSteps": ["specific next actions"],
+    "evidenceNeeded": ["video, photo, code screenshot, data table, CAD, score, etc."]
+  },
+  "judgeBrief": {
+    "engineeringChallenge": "main challenge",
+    "designIterations": ["iterations and why they matter"],
+    "testingEvidence": ["evidence the team can show or still needs"],
+    "softwareContributions": ["software/code contributions"],
+    "mechanicalContributions": ["mechanical/build/CAD contributions"],
+    "teamwork": "who contributed and how",
+    "likelyQuestions": ["5 likely judge questions"]
+  },
+  "evidenceVault": [{"type": "Testing evidence|Photo evidence|Code evidence|Design artifact|Notebook evidence", "description": "what proof is needed or mentioned", "relatedTo": "decision/task/mission", "usefulFor": "Engineering notebook / judging / project history", "status": "NEEDED|MENTIONED|UPLOADED"}],
+  "designMemory": [{"question": "why/when decision question users may ask later", "answer": "answer using this mission", "citations": ["mission title or exact section"]}]
+}
+
+The notebookPage must read like a full engineering notebook page, not a short meeting summary.
+The judgeBrief must be competition-ready and include likely judge questions.
+The evidenceVault should tag missing proof even if no files were uploaded.`;
+
 function getUserPrompt(transcript: string, crew: string, mode: MissionMode, customCategory?: string): string {
   const crewList = crew.trim() ? `Crew members present: ${crew}` : "Crew members: extract from transcript context clues or mark as 'Unknown'";
 
@@ -176,7 +221,7 @@ MEETING TRANSCRIPT:
 ${transcript}
 ---
 
-Analyze this transcript and generate the structured documentation. Be thorough and specific. Include actual names, measurements, technical details, and industry-specific information when mentioned. If something is vague in the transcript, note it in missingDocumentationWarnings. Remember: respond with valid JSON only, no markdown formatting.`;
+Analyze this transcript and generate the structured documentation. Be thorough and specific. Include actual names, measurements, technical details, and industry-specific information when mentioned. If something is vague in the transcript, note it in missingDocumentationWarnings. Remember: respond with valid JSON only, no markdown formatting.${productSystemSchema}`;
   }
 
   const modeContext: Record<Exclude<MissionMode, "custom">, string> = {
@@ -199,7 +244,7 @@ MEETING TRANSCRIPT:
 ${transcript}
 ---
 
-Analyze this transcript and generate the structured documentation. Be thorough and specific. Remember: respond with valid JSON only.`;
+Analyze this transcript and generate the structured documentation. Be thorough and specific. Remember: respond with valid JSON only.${productSystemSchema}`;
   }
 
   return `${modeContext[mode]}
@@ -211,7 +256,7 @@ MEETING TRANSCRIPT:
 ${transcript}
 ---
 
-Analyze this transcript and generate the structured documentation. Be thorough and specific. Include actual names, measurements, and technical details when mentioned. If something is vague in the transcript, note it in missingDocumentationWarnings. Remember: respond with valid JSON only, no markdown formatting.`;
+Analyze this transcript and generate the structured documentation. Be thorough and specific. Include actual names, measurements, and technical details when mentioned. If something is vague in the transcript, note it in missingDocumentationWarnings. Remember: respond with valid JSON only, no markdown formatting.${productSystemSchema}`;
 }
 
 export async function generateMissionLog(
@@ -219,7 +264,8 @@ export async function generateMissionLog(
   crew: string,
   mode: MissionMode,
   title: string,
-  customCategory?: string
+  customCategory?: string,
+  context?: { projectName?: string; teamName?: string }
 ): Promise<MissionLog> {
   const apiKey = process.env.NVIDIA_NIM_API_KEY;
 
@@ -267,11 +313,16 @@ export async function generateMissionLog(
   const mission: MissionLog = {
     id: uuidv4(),
     title,
+    teamName: context?.teamName || "",
     missionMode: mode,
     crew: crew.split(",").map((c) => c.trim()).filter(Boolean),
     date: new Date().toISOString(),
     rawTranscript: transcript,
     summary: (parsed.summary as string) || "",
+    notebookPage: parsed.notebookPage as NotebookPage | undefined,
+    judgeBrief: parsed.judgeBrief as JudgeBrief | undefined,
+    evidenceVault: parsed.evidenceVault as EvidenceItem[] | undefined,
+    designMemory: parsed.designMemory as DesignMemoryEntry[] | undefined,
     engineeringNotebookEntry: (parsed.engineeringNotebookEntry as string) || "",
     commandDecisions: (parsed.commandDecisions as CommandDecision[]) || [],
     taskAssignments: (parsed.taskAssignments as TaskAssignment[]) || [],
@@ -282,7 +333,7 @@ export async function generateMissionLog(
     missingDocumentationWarnings: (parsed.missingDocumentationWarnings as string[]) || [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    projectName: "",
+    projectName: context?.projectName || "",
   };
 
   return mission;

@@ -27,6 +27,7 @@ const modes: { value: MissionMode; label: string; icon: string; desc: string }[]
 export default function MissionForm({ onSubmit, loading, initialTranscript = "", onTranscriptChange }: MissionFormProps) {
   const [formData, setFormData] = useState<MissionFormData>({
     title: "",
+    teamName: "VEX Robotics 1234A",
     missionMode: "standard",
     crew: "",
     transcript: initialTranscript,
@@ -53,7 +54,7 @@ export default function MissionForm({ onSubmit, loading, initialTranscript = "",
           Document your <span className="serif-italic">team meeting</span>
         </h1>
         <p style={{ fontSize: 14.5, color: "var(--ink-3)", marginTop: 14 }}>
-          Paste your notes. AI generates engineering logs, tasks, and stakeholder summaries.
+          Paste your notes. AI generates a full notebook page, tasks, decisions, evidence gaps, and judge prep.
         </p>
       </div>
 
@@ -145,6 +146,19 @@ export default function MissionForm({ onSubmit, loading, initialTranscript = "",
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 28 }}>
         <div>
           <label className="mono" style={{ display: "block", marginBottom: 6 }}>
+            Team
+          </label>
+          <input
+            type="text"
+            value={formData.teamName || ""}
+            onChange={(e) => setFormData((f) => ({ ...f, teamName: e.target.value }))}
+            placeholder="e.g., VEX Robotics 1234A"
+            className="input"
+          />
+        </div>
+
+        <div>
+          <label className="mono" style={{ display: "block", marginBottom: 6 }}>
             Mission Title
           </label>
           <input
@@ -157,7 +171,7 @@ export default function MissionForm({ onSubmit, loading, initialTranscript = "",
           />
         </div>
 
-        <div>
+        <div style={{ gridColumn: "1 / -1" }}>
           <label className="mono" style={{ display: "block", marginBottom: 6 }}>
             Project Name
           </label>

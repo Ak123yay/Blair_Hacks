@@ -73,7 +73,7 @@ export default function MissionCard({ mission, onDelete }: MissionCardProps) {
             <span className="mono" style={{ fontSize: 9.5 }}>{dateStr}</span>
             {mission.projectName && (
               <>
-                <span style={{ color: "var(--ink-4)" }}>·</span>
+                <span style={{ color: "var(--ink-4)" }}>-</span>
                 <span className="mono" style={{ fontSize: 9.5 }}>{mission.projectName}</span>
               </>
             )}

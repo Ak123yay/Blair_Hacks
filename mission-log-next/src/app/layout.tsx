@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MissionLog — AI Engineering Notebook",
+  title: "MissionLog - AI Engineering Notebook",
   description:
     "Turn messy team meetings into organized engineering logs, task lists, and judge-ready progress summaries for robotics and hackathon teams.",
 };
@@ -25,9 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="paper-bg">
-        {children}
-      </body>
+      <body className="paper-bg">{children}</body>
     </html>
   );
 }

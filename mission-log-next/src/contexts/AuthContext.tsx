@@ -23,7 +23,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    refreshUser();
+    let active = true;
+
+    getUser().then((nextUser) => {
+      if (!active) return;
+      setUser(nextUser);
+      setLoading(false);
+    });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const signOut = async () => {

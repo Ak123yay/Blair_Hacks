@@ -4,7 +4,8 @@ import { generateMissionLog } from "@/lib/glm";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { transcript, crew, mode, title, customCategory } = body;
+    const { transcript, crew, missionMode, mode, title, customCategory, teamName, projectName } = body;
+    const selectedMode = missionMode || mode || "standard";
 
     if (!transcript || !transcript.trim()) {
       return NextResponse.json(
@@ -23,9 +24,10 @@ export async function POST(request: NextRequest) {
     const mission = await generateMissionLog(
       transcript,
       crew || "",
-      mode || "standard",
+      selectedMode,
       title,
-      customCategory
+      customCategory,
+      { teamName, projectName }
     );
 
     return NextResponse.json(mission);
