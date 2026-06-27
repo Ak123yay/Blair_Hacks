@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { FormEvent, useState, useTransition, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -220,7 +220,7 @@ export default function AuthPage({ mode = "login" }: { mode?: "login" | "signup"
         </Link>
 
         <div className="auth-quote">
-          <p className="hand">"90 seconds. I almost cried."</p>
+          <p className="hand">&quot;90 seconds. I almost cried.&quot;</p>
           <h2 className="serif">
             I&apos;d been putting off documentation for <span className="serif-italic">six weeks</span>.
             MissionLog built our engineering notebook while I made coffee.
@@ -229,7 +229,7 @@ export default function AuthPage({ mode = "login" }: { mode?: "login" | "signup"
             <div className="auth-thumb" aria-hidden="true">TS</div>
             <div>
               <p>Team Shadow</p>
-              <span>VEX Robotics · Blair Academy</span>
+              <span>VEX Robotics - Blair Academy</span>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import DashShell from "@/components/DashShell";
+
 import { Ic } from "@/components/icons/Ic";
 
 const changelog = [
@@ -97,7 +97,7 @@ const typeColors: Record<string, string> = {
 
 export default function ChangelogPage() {
   return (
-    <DashShell>
+    <>
       <div style={{ marginBottom: 32 }}>
         <div className="eyebrow" style={{ marginBottom: 8 }}>Product Updates</div>
         <h1 className="serif" style={{ fontSize: 36, fontWeight: 400, margin: 0 }}>
@@ -212,6 +212,6 @@ textAlign: "center",
           <button className="btn btn-accent">Subscribe</button>
         </div>
       </div>
-    </DashShell>
+    </>
   );
 }

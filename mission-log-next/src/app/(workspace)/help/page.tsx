@@ -1,6 +1,6 @@
 "use client";
 
-import DashShell from "@/components/DashShell";
+
 import { Ic } from "@/components/icons/Ic";
 
 const faqs = [
@@ -55,7 +55,7 @@ const guides = [
 
 export default function HelpPage() {
   return (
-    <DashShell>
+    <>
       <div style={{ marginBottom: 32 }}>
         <div className="eyebrow" style={{ marginBottom: 8 }}>Support</div>
         <h1 className="serif" style={{ fontSize: 36, fontWeight: 400, margin: 0 }}>
@@ -212,6 +212,6 @@ export default function HelpPage() {
           ))}
         </div>
       </div>
-    </DashShell>
+    </>
   );
 }

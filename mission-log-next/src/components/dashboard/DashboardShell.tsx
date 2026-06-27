@@ -3,13 +3,11 @@
 import {
   ChevronLeft,
   ChevronRight,
-  CreditCard,
   HelpCircle,
   LayoutDashboard,
   LogOut,
   Plus,
   Sparkles,
-  UserRound,
   Clock,
   BarChart3,
   Users,

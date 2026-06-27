@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Ic } from "@/components/icons/Ic";
 import { MissionLog } from "@/types/mission";
 
@@ -121,12 +122,12 @@ export default function MissionCard({ mission, onDelete }: MissionCardProps) {
         >
           {mission.missionMode}
         </span>
-        <a
+        <Link
           href={`/mission/${mission.id}`}
           style={{ fontSize: 12, color: "var(--accent-ink)", display: "flex", alignItems: "center", gap: 4 }}
         >
           View <Ic name="arrow-r" size={11} />
-        </a>
+        </Link>
       </div>
     </div>
   );

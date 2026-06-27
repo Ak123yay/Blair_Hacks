@@ -16,7 +16,7 @@ export default function SettingsPage() {
   ];
 
   return (
-    <DashShell>
+    <>
       <div style={{ marginBottom: 32 }}>
         <div className="eyebrow" style={{ marginBottom: 8 }}>Configuration</div>
         <h1 className="serif" style={{ fontSize: 36, fontWeight: 400, margin: 0 }}>
@@ -299,6 +299,6 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
-    </DashShell>
+    </>
   );
 }

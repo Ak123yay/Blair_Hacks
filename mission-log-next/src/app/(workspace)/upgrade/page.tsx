@@ -1,6 +1,6 @@
 "use client";
 
-import DashShell from "@/components/DashShell";
+
 import { Ic } from "@/components/icons/Ic";
 
 const plans = [
@@ -76,7 +76,7 @@ const comparison = [
 
 export default function UpgradePage() {
   return (
-    <DashShell>
+    <>
       <div style={{ marginBottom: 32 }}>
         <div className="eyebrow" style={{ marginBottom: 8 }}>Pricing</div>
         <h1 className="serif" style={{ fontSize: 36, fontWeight: 400, margin: 0 }}>
@@ -239,7 +239,7 @@ export default function UpgradePage() {
             What happens if I exceed the Scout limit?
           </h3>
           <p style={{ fontSize: 13, color: "var(--ink-3)", margin: 0 }}>
-            You'll be notified when you're approaching your limit. Upgrade to Commander for unlimited missions.
+            You&apos;ll be notified when you&apos;re approaching your limit. Upgrade to Commander for unlimited missions.
           </p>
         </div>
         <div className="card" style={{ padding: 24, marginBottom: 16 }}>
@@ -274,6 +274,6 @@ export default function UpgradePage() {
           Start Free Trial
         </button>
       </div>
-    </DashShell>
+    </>
   );
 }

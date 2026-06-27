@@ -72,7 +72,7 @@ export default function AudioUploader({ onTranscriptReady, onError, disabled }: 
           const data = await response.json();
           console.error("Transcription error details:", data);
           errorMessage = data.error || `Server error: ${response.status}`;
-        } catch (e) {
+        } catch {
           const text = await response.text();
           console.error("Transcription error (non-JSON):", text);
           errorMessage = text || `Server error: ${response.status}`;
@@ -228,7 +228,7 @@ export default function AudioUploader({ onTranscriptReady, onError, disabled }: 
               or click to browse
             </p>
             <div className="mono" style={{ fontSize: 10, color: "var(--ink-4)" }}>
-              MP3, WAV, MP4, WebM, OGG · Max 25MB
+              MP3, WAV, MP4, WebM, OGG - max 25MB
             </div>
           </div>
         )}

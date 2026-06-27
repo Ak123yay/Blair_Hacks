@@ -1,23 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import MissionCard from "@/components/MissionCard";
 import { MissionLog } from "@/types/mission";
 import { getMissionsLocal, deleteMission as removeMission, getUniqueProjectsLocal } from "@/lib/storage";
 import { Ic } from "@/components/icons/Ic";
 
 export default function DashboardPage() {
-  const [missions, setMissions] = useState<MissionLog[]>([]);
-  const [projects, setProjects] = useState<string[]>([]);
+  const [missions, setMissions] = useState<MissionLog[]>(() => getMissionsLocal());
+  const [projects, setProjects] = useState<string[]>(() => getUniqueProjectsLocal());
   const [search, setSearch] = useState("");
   const [projectFilter, setProjectFilter] = useState("");
-
-  useEffect(() => {
-    const data = getMissionsLocal();
-    setMissions(data);
-    const uniqueProjects = getUniqueProjectsLocal();
-    setProjects(uniqueProjects);
-  }, []);
 
   const handleDelete = (id: string) => {
     removeMission(id);

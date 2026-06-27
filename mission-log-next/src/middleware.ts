@@ -47,12 +47,6 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/upgrade") ||
     request.nextUrl.pathname.startsWith("/timeline");
 
-  const isPublicPath =
-    request.nextUrl.pathname === "/" ||
-    request.nextUrl.pathname === "/login" ||
-    request.nextUrl.pathname === "/signup" ||
-    request.nextUrl.pathname.startsWith("/auth");
-
   if (isProtectedPath && !user) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";

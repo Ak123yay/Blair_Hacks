@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { MissionFormData, MissionMode } from "@/types/mission";
 import { Ic } from "@/components/icons/Ic";
 import { StyleSection } from "./Shared";
@@ -33,13 +33,6 @@ export default function MissionForm({ onSubmit, loading, initialTranscript = "",
     projectName: "",
     customCategory: "",
   });
-
-  useEffect(() => {
-    if (initialTranscript) {
-      setFormData((f) => ({ ...f, transcript: initialTranscript }));
-      onTranscriptChange?.(initialTranscript);
-    }
-  }, [initialTranscript]);
 
   const handleTranscriptChange = (value: string) => {
     setFormData((f) => ({ ...f, transcript: value }));
@@ -127,7 +120,7 @@ export default function MissionForm({ onSubmit, loading, initialTranscript = "",
         {formData.missionMode === "custom" && (
           <div style={{ marginTop: 16 }}>
             <label className="mono" style={{ display: "block", marginBottom: 6 }}>
-              <Ic name="sparkle" size={11} className="inline mr-1" /> What's your team category?
+              <Ic name="sparkle" size={11} className="inline mr-1" /> What&apos;s your team category?
             </label>
             <input
               type="text"
@@ -249,10 +242,10 @@ Example:
         <div style={{ fontSize: 13, color: "var(--ink-3)" }}>
           <Ic name="sparkle" size={13} className="inline" color="var(--accent-ink)" />
           <span style={{ marginLeft: 6 }}>
-            Powered by GLM 5.1 · ~30 seconds
+            Powered by GLM 5.1 - about 30 seconds
             {formData.missionMode === "custom" && formData.customCategory && (
               <span style={{ marginLeft: 8, color: "var(--accent-ink)" }}>
-                · Custom: {formData.customCategory}
+                - Custom: {formData.customCategory}
               </span>
             )}
           </span>

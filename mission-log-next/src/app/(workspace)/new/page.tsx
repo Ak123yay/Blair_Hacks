@@ -3,11 +3,10 @@
 import { useState } from "react";
 import MissionForm from "@/components/MissionForm";
 import MissionResults from "@/components/MissionResults";
-import AudioUploader from "@/components/AudioUploader";
 import { MissionLog, MissionFormData } from "@/types/mission";
 import { saveMission } from "@/lib/storage";
 import { Ic } from "@/components/icons/Ic";
-import DashShell from "@/components/DashShell";
+
 
 export default function NewMissionPage() {
   const [result, setResult] = useState<MissionLog | null>(null);
@@ -51,16 +50,8 @@ export default function NewMissionPage() {
     }
   };
 
-  const handleTranscriptReady = (transcript: string, fileName: string) => {
-    setTranscriptFromAudio(transcript);
-  };
-
-  const handleAudioError = (errorMsg: string) => {
-    setError(errorMsg);
-  };
-
   return (
-    <DashShell>
+    <>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
         {!result && !loading && (
           <div className="card" style={{ padding: "40px 48px" }}>
@@ -142,6 +133,6 @@ export default function NewMissionPage() {
           <MissionResults mission={result} onSave={handleSave} saved={saved} />
         )}
       </div>
-    </DashShell>
+    </>
   );
 }

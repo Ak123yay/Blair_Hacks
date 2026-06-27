@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Ic } from "@/components/icons/Ic";
 
 export default function NotFound() {
@@ -28,14 +29,14 @@ export default function NotFound() {
         The page you&apos;re looking for has drifted into deep space. Let&apos;s get you back on course.
       </p>
       <div style={{ display: "flex", gap: 12 }}>
-        <a href="/" className="btn btn-accent">
+        <Link href="/" className="btn btn-accent">
           <Ic name="home" size={16} />
           Back Home
-        </a>
-        <a href="/dashboard" className="btn btn-soft">
+        </Link>
+        <Link href="/dashboard" className="btn btn-soft">
           <Ic name="sites" size={16} />
           Dashboard
-        </a>
+        </Link>
       </div>
     </div>
   );

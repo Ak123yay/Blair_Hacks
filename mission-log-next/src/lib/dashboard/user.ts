@@ -44,7 +44,7 @@ export async function getDashboardUser(): Promise<DashboardUser | null> {
   }
 }
 
-export async function getDashboardUserOrRedirect(redirectTo: string = "/login"): Promise<DashboardUser> {
+export async function getDashboardUserOrRedirect(): Promise<DashboardUser> {
   const user = await getDashboardUser();
   if (!user) {
     throw new Error("Not authenticated");
