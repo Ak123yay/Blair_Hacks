@@ -12,12 +12,14 @@ export default function NewMissionPage() {
   const [result, setResult] = useState<MissionLog | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [transcriptFromAudio, setTranscriptFromAudio] = useState<string>("");
 
   const handleSubmit = async (data: MissionFormData) => {
     setLoading(true);
     setError(null);
+    setSaveError(null);
     setResult(null);
     setSaved(false);
 
@@ -43,10 +45,17 @@ export default function NewMissionPage() {
     }
   };
 
-  const handleSave = () => {
-    if (result) {
-      saveMission(result);
+  const handleSave = async () => {
+    if (!result) return;
+
+    setSaveError(null);
+
+    try {
+      await saveMission(result);
       setSaved(true);
+    } catch (err: unknown) {
+      setSaved(false);
+      setSaveError(err instanceof Error ? err.message : "Mission save failed");
     }
   };
 
@@ -130,7 +139,27 @@ export default function NewMissionPage() {
         )}
 
         {result && !loading && (
-          <MissionResults mission={result} onSave={handleSave} saved={saved} />
+          <>
+            {saveError && (
+              <div
+                className="card fadein-up"
+                style={{
+                  padding: 18,
+                  margin: "0 0 18px",
+                  borderColor: "oklch(0.85 0.08 25)",
+                  background: "oklch(0.97 0.02 25)",
+                }}
+              >
+                <div className="mono" style={{ marginBottom: 6, color: "oklch(0.55 0.10 50)" }}>
+                  Save failed
+                </div>
+                <p style={{ margin: 0, color: "var(--ink-3)", fontSize: 13.5 }}>
+                  {saveError}
+                </p>
+              </div>
+            )}
+            <MissionResults mission={result} onSave={handleSave} saved={saved} />
+          </>
         )}
       </div>
     </>

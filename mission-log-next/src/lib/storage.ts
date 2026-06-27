@@ -1,9 +1,24 @@
 import { MissionLog } from "@/types/mission";
-import { supabase } from "./supabase";
+import { missionToRow, rowToMission } from "./mission-db";
+import { createClient } from "./supabase/client";
 
 const LOCAL_STORAGE_KEY = "missionlog_missions";
 
+function isSupabaseConfigured() {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith("https://") &&
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  );
+}
+
+function getSupabaseClient() {
+  if (typeof window === "undefined" || !isSupabaseConfigured()) return null;
+  return createClient();
+}
+
 export async function getMissions(): Promise<MissionLog[]> {
+  const supabase = getSupabaseClient();
+
   if (supabase) {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
@@ -14,7 +29,11 @@ export async function getMissions(): Promise<MissionLog[]> {
         .order("created_at", { ascending: false });
 
       if (!error && data) {
-        return data;
+        return (data as Record<string, unknown>[]).map((row) => rowToMission(row));
+      }
+
+      if (error) {
+        console.error("Failed to load missions from Supabase:", error.message);
       }
     }
   }
@@ -30,19 +49,21 @@ export async function getMission(id: string): Promise<MissionLog | undefined> {
 }
 
 export async function saveMission(mission: MissionLog): Promise<void> {
+  const supabase = getSupabaseClient();
+
   if (supabase) {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (user) {
       const { error } = await supabase
         .from("missions")
-        .upsert({
-          ...mission,
-          user_id: user.id,
-          updated_at: new Date().toISOString(),
-        });
+        .upsert(missionToRow(mission, user.id));
 
-      if (!error) return;
+      if (error) {
+        throw new Error(`Mission save failed: ${error.message}`);
+      }
+
+      return;
     }
   }
 
@@ -57,6 +78,8 @@ export async function saveMission(mission: MissionLog): Promise<void> {
 }
 
 export async function deleteMission(id: string): Promise<void> {
+  const supabase = getSupabaseClient();
+
   if (supabase) {
     const { data: { user } } = await supabase.auth.getUser();
     
@@ -67,7 +90,11 @@ export async function deleteMission(id: string): Promise<void> {
         .eq("id", id)
         .eq("user_id", user.id);
 
-      if (!error) return;
+      if (error) {
+        throw new Error(`Mission delete failed: ${error.message}`);
+      }
+
+      return;
     }
   }
 

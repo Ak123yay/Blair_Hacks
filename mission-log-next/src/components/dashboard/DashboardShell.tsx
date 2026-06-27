@@ -7,14 +7,7 @@ import {
   LayoutDashboard,
   LogOut,
   Plus,
-  Sparkles,
-  Clock,
-  BarChart3,
-  Users,
-  Bell,
   Settings,
-  History,
-  Star,
   Archive,
   Brain,
   Trophy,
@@ -41,21 +34,15 @@ type DashboardShellProps = {
 
 const primaryNav = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/timeline", label: "Timeline", icon: Clock },
-  { href: "/evidence", label: "Evidence Vault", icon: Archive },
-  { href: "/memory", label: "Design Memory", icon: Brain },
-  { href: "/judge", label: "Judge Mode", icon: Trophy },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/new", label: "New Mission", icon: Plus, accent: true },
+  { href: "/memory", label: "Ask Memory", icon: Brain },
+  { href: "/evidence", label: "Evidence", icon: Archive },
+  { href: "/judge", label: "Judge Prep", icon: Trophy },
 ];
 
 const secondaryNav = [
-  { href: "/team", label: "Team", icon: Users },
-  { href: "/notifications", label: "Activity", icon: Bell },
   { href: "/settings", label: "Settings", icon: Settings },
   { href: "/help", label: "Help", icon: HelpCircle },
-  { href: "/changelog", label: "Changelog", icon: History },
-  { href: "/upgrade", label: "Upgrade", icon: Star },
 ];
 
 function isActivePath(pathname: string, href: string) {
@@ -199,23 +186,12 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
           })}
         </nav>
 
-        {user.isTrial ? (
-          <div className="dashboard-trial-card">
-            <div className="dashboard-trial-icon" aria-hidden="true">
-              <Sparkles size={16} />
-            </div>
-            <p className="mono">Pro trial</p>
-            <h2>{trialLabel(trialDaysLeft)}</h2>
-            <p>
-              Keep your missions, analytics, and team collaboration after the trial ends.
-            </p>
-            <Link className="btn btn-accent btn-sm dashboard-trial-button" href="/upgrade">
-              Upgrade
-            </Link>
-          </div>
-        ) : null}
-
         <div className="dashboard-sidebar-footer">
+          {user.isTrial ? (
+            <Link className="dashboard-plan-link" href="/upgrade">
+              Pro trial - {trialLabel(trialDaysLeft)}
+            </Link>
+          ) : null}
           <div className="dashboard-user-card">
             <span className="dashboard-user-avatar" aria-hidden="true">
               {user.initial}
@@ -249,7 +225,9 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
             New
           </Link>
         </header>
-        {children}
+        <div className="dashboard-content">
+          {children}
+        </div>
       </main>
     </div>
   );

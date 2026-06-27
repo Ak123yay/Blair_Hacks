@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import MissionCard from "@/components/MissionCard";
 import { Ic } from "@/components/icons/Ic";
 import { getEvidenceVault, getJudgeReadinessScore } from "@/lib/mission-derived";
@@ -42,16 +43,6 @@ export default function DashboardPage() {
     return matchesSearch && matchesProject;
   });
 
-  const modeCounts = {
-    vex: missions.filter((mission) => mission.missionMode === "vex").length,
-    hackathon: missions.filter((mission) => mission.missionMode === "hackathon").length,
-    startup: missions.filter((mission) => mission.missionMode === "startup").length,
-    research: missions.filter((mission) => mission.missionMode === "research").length,
-    freelance: missions.filter((mission) => mission.missionMode === "freelance").length,
-    enterprise: missions.filter((mission) => mission.missionMode === "enterprise").length,
-    custom: missions.filter((mission) => mission.missionMode === "custom").length,
-  };
-
   const openObjectives = missions.reduce(
     (sum, mission) =>
       sum + (mission.taskAssignments?.filter((task) => task.status !== "COMPLETED").length || 0),
@@ -70,34 +61,37 @@ export default function DashboardPage() {
     ? Math.round(missions.reduce((sum, mission) => sum + getJudgeReadinessScore(mission), 0) / missions.length)
     : 0;
   const activeTeam = missions.find((mission) => mission.teamName)?.teamName || "VEX Robotics 1234A";
-  const modeSummary = [
-    modeCounts.vex > 0 ? `${modeCounts.vex} VEX` : "",
-    modeCounts.hackathon > 0 ? `${modeCounts.hackathon} Hackathon` : "",
-    modeCounts.startup > 0 ? `${modeCounts.startup} Startup` : "",
-    modeCounts.research > 0 ? `${modeCounts.research} Research` : "",
-    modeCounts.freelance > 0 ? `${modeCounts.freelance} Freelance` : "",
-    modeCounts.enterprise > 0 ? `${modeCounts.enterprise} Enterprise` : "",
-    modeCounts.custom > 0 ? `${modeCounts.custom} Custom` : "",
-  ].filter(Boolean);
 
   return (
     <div className="fadein-up">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 28 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: 20, marginBottom: 24 }}>
         <div>
-          <div className="eyebrow" style={{ marginBottom: 8 }}>AI Mission Control</div>
-          <h1 className="serif" style={{ fontSize: 40, fontWeight: 400, margin: 0 }}>
-            {activeTeam}
-            <span style={{ color: "var(--ink-3)" }}>
-              {" - "}
-              {missions.length} {missions.length === 1 ? "Mission" : "Missions"}
-              {modeSummary.length ? ` - ${modeSummary.join(" - ")}` : ""}
-            </span>
+          <div className="eyebrow" style={{ marginBottom: 8 }}>MissionLog Home</div>
+          <h1 className="serif" style={{ fontSize: 36, fontWeight: 400, margin: 0 }}>
+            Mission Control
           </h1>
-          <p style={{ color: "var(--ink-3)", fontSize: 14.5, lineHeight: 1.6, maxWidth: 700, margin: "12px 0 0" }}>
-            Track meetings, full notebook pages, objectives, decisions, evidence gaps,
-            project timeline, and judge readiness from one serious student-engineering dashboard.
+          <p style={{ color: "var(--ink-3)", fontSize: 14.5, lineHeight: 1.6, maxWidth: 620, margin: "10px 0 0" }}>
+            {activeTeam} has {missions.length} saved {missions.length === 1 ? "mission" : "missions"}. Start with a meeting, then review memory, evidence, and judge prep.
           </p>
         </div>
+        <Link className="btn btn-accent" href="/new" style={{ flexShrink: 0 }}>
+          <Ic name="plus" size={14} color="white" />
+          New Mission
+        </Link>
+      </div>
+
+      <div className="dashboard-action-grid">
+        {[
+          { href: "/new", label: "Create a mission", desc: "Paste notes or upload audio. AI turns it into a clean log.", icon: "plus" },
+          { href: "/memory", label: "Ask memory", desc: "Ask why the team made a design choice and get cited answers.", icon: "database" },
+          { href: "/judge", label: "Prep for judges", desc: "See likely questions, proof gaps, and readiness signals.", icon: "star" },
+        ].map((item) => (
+          <Link className="card hover-lift dashboard-action-card" href={item.href} key={item.href}>
+            <span className="dashboard-action-icon"><Ic name={item.icon} size={16} color="var(--accent-ink)" /></span>
+            <strong>{item.label}</strong>
+            <p>{item.desc}</p>
+          </Link>
+        ))}
       </div>
 
       <div className="mission-control-grid" style={{ marginBottom: 22 }}>

@@ -24,6 +24,26 @@ const modes: { value: MissionMode; label: string; icon: string; desc: string }[]
   { value: "custom", label: "Custom", icon: "sparkle", desc: "Define your own category" },
 ];
 
+const sampleRoboticsMission: MissionFormData = {
+  title: "Drive Base Testing and Intake Reliability",
+  teamName: "VEX Robotics 1234A",
+  missionMode: "vex",
+  crew: "Aarush, Maya, Jordan, Sam",
+  projectName: "VEX High Stakes Robot",
+  customCategory: "",
+  transcript: `Today the team tested the new drivetrain and intake changes on the practice field.
+
+The main goal was to decide whether to keep the H-drive prototype or switch back to a tank drive base before the next tournament. Maya ran five strafing tests with the H-drive and the robot drifted right by 8 to 12 inches on three of the runs. The center wheel also lost traction when the battery dropped below 70 percent. Jordan compared this with the tank drive setup from last week, which was less maneuverable but much more consistent during autonomous.
+
+After reviewing the test results, the team decided to stop using H-drive and move back to tank drive for competition reliability. The reason was that consistent autonomous pathing matters more than sideways movement for our current scoring strategy. We need to document this with a photo of both drive bases and a table comparing strafing accuracy, turn accuracy, and autonomous success rate.
+
+Sam updated the autonomous routine for the tank drive. The robot completed the first scoring path 4 out of 5 times, but the final turn was still about 3 degrees short. Aarush tuned the turn PID from 0.42 to 0.48 and reduced the error to about 1.5 degrees. We still need one full-field video showing the final autonomous run.
+
+The intake worked better after adding a second rubber band, but the left roller slipped when the robot contacted the wall. Maya suggested replacing the rubber band tensioner with a small standoff spacer. Jordan will CAD the spacer tonight and bring a printed version to the next build session.
+
+Tasks for next meeting: Sam will finish autonomous tuning, Maya will collect video evidence, Jordan will CAD and print the intake spacer, and Aarush will update the engineering notebook with the drivetrain decision and test data. The team also needs photos of the old H-drive, the new tank drive, and the intake roller issue.`,
+};
+
 export default function MissionForm({ onSubmit, loading, initialTranscript = "", onTranscriptChange }: MissionFormProps) {
   const [formData, setFormData] = useState<MissionFormData>({
     title: "",
@@ -34,6 +54,11 @@ export default function MissionForm({ onSubmit, loading, initialTranscript = "",
     projectName: "",
     customCategory: "",
   });
+
+  const loadSampleRoboticsMission = () => {
+    setFormData(sampleRoboticsMission);
+    onTranscriptChange?.(sampleRoboticsMission.transcript);
+  };
 
   const handleTranscriptChange = (value: string) => {
     setFormData((f) => ({ ...f, transcript: value }));
@@ -56,6 +81,15 @@ export default function MissionForm({ onSubmit, loading, initialTranscript = "",
         <p style={{ fontSize: 14.5, color: "var(--ink-3)", marginTop: 14 }}>
           Paste your notes. AI generates a full notebook page, tasks, decisions, evidence gaps, and judge prep.
         </p>
+        <button
+          type="button"
+          className="btn btn-soft"
+          onClick={loadSampleRoboticsMission}
+          style={{ marginTop: 18 }}
+        >
+          <Ic name="sparkle" size={14} />
+          Load Sample Robotics Mission
+        </button>
       </div>
 
       {/* MODE SELECTION */}

@@ -13,6 +13,57 @@ import { v4 as uuidv4 } from "uuid";
 
 const NVIDIA_NIM_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 
+function cleanJsonContent(content: string) {
+  return content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+}
+
+function parseJsonObject(content: string) {
+  const cleanContent = cleanJsonContent(content);
+  const start = cleanContent.indexOf("{");
+  const end = cleanContent.lastIndexOf("}");
+  const jsonText = start >= 0 && end >= start ? cleanContent.slice(start, end + 1) : cleanContent;
+  return JSON.parse(jsonText) as Record<string, unknown>;
+}
+
+async function repairMissionJson(content: string, apiKey: string) {
+  const response = await fetch(NVIDIA_NIM_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "z-ai/glm-5.1",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You repair malformed or truncated JSON for MissionLog. Return valid JSON only. If a field is missing, use an empty string or empty array. Do not include markdown.",
+        },
+        {
+          role: "user",
+          content: `Repair this partial MissionLog JSON into one complete valid JSON object with these keys: summary, engineeringNotebookEntry, commandDecisions, taskAssignments, systemAnomalies, nextMissionGoals, proofChecklist, judgeRecap, missingDocumentationWarnings, notebookPage, judgeBrief, evidenceVault, designMemory.\n\nPartial JSON:\n${content.slice(0, 12000)}`,
+        },
+      ],
+      temperature: 0,
+      max_tokens: 4096,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`NVIDIA NIM JSON repair error (${response.status}): ${errorText}`);
+  }
+
+  const data = await response.json();
+  const repairedContent = data.choices?.[0]?.message?.content;
+  if (!repairedContent) {
+    throw new Error("No JSON repair content returned from NVIDIA NIM API");
+  }
+
+  return parseJsonObject(repairedContent);
+}
+
 function getSystemPrompt(mode: MissionMode, customCategory?: string): string {
   if (mode === "custom" && customCategory) {
     return `You are MissionLog AI, a specialized documentation assistant for ${customCategory} teams. You analyze meeting transcripts and generate structured, professional documentation tailored to ${customCategory}.
@@ -286,7 +337,7 @@ export async function generateMissionLog(
         { role: "user", content: getUserPrompt(transcript, crew, mode, customCategory) },
       ],
       temperature: 0.4,
-      max_tokens: 4096,
+      max_tokens: 8192,
     }),
   });
 
@@ -304,10 +355,14 @@ export async function generateMissionLog(
 
   let parsed: Record<string, unknown>;
   try {
-    const cleanContent = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    parsed = JSON.parse(cleanContent);
+    parsed = parseJsonObject(content);
   } catch {
-    throw new Error(`Failed to parse NVIDIA NIM response as JSON. Raw: ${content.substring(0, 500)}`);
+    try {
+      parsed = await repairMissionJson(content, apiKey);
+    } catch (repairError) {
+      const reason = repairError instanceof Error ? repairError.message : "JSON repair failed";
+      throw new Error(`Failed to parse NVIDIA NIM response as JSON. ${reason}. Raw: ${content.substring(0, 500)}`);
+    }
   }
 
   const mission: MissionLog = {
